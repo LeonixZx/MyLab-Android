@@ -1,0 +1,5671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyLAB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
+        :root {
+            /* Theme Colors */
+            --bg-light: #f8f9fa;
+            --card-light: rgba(255, 255, 255, 0.7);
+            --text-light: #2d3436;
+            --border-light: rgba(0, 0, 0, 0.1);
+            
+            --bg-dark: #1a1b1e;
+            --card-dark: rgba(45, 52, 54, 0.7);
+            --text-dark: #ffffff;
+            --border-dark: rgba(255, 255, 255, 0.1);
+            
+            /* Calculator Card Colors */
+            --log-reduction: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 100%);
+            --dilution: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%);
+            --cfu: linear-gradient(135deg, #FFD1A1 0%, #FFA07A 100%);
+            --media: linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%);
+            --ethanol: linear-gradient(135deg, #e75e79 0%, #f0a5ec 100%);
+			--buffer: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);
+			--buffer-ph: linear-gradient(135deg, #9ebc27 0%, #d3e688 100%);
+			
+            /* Fixed heights */
+            --header-height: 64px;
+            --footer-height: 60px;
+            --search-height: 60px;
+            --content-height: calc(100vh - var(--header-height) - var(--footer-height));
+            --transition-speed: 0.3s;
+			
+			--page-transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+			--scale-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+			--fade-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);			
+			--vh: 1vh;
+        }
+
+		* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg-light);
+            -webkit-text-size-adjust: 100%;
+			
+			height: calc(var(--vh, 1vh) * 100);
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+        }
+
+        body {
+            color: var(--text-light);
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        body.dark {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Enhanced Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            z-index: 1000;
+            background: var(--card-light);
+            border-bottom: 1px solid var(--border-light);
+            transition: all var(--transition-speed) ease;
+        }
+
+        @supports (backdrop-filter: blur(10px)) {
+            .navbar {
+                backdrop-filter: blur(10px);
+                background: rgba(255, 255, 255, 0.7);
+            }
+
+            .dark .navbar {
+                background: rgba(45, 52, 54, 0.7);
+            }
+        }
+
+        .dark .navbar {
+            background: var(--card-dark);
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+		.nav-brand {
+			display: flex;
+			align-items: center;
+			gap: 0.25rem;
+			font-size: 1.25rem;
+			font-weight: 600;
+			position: relative;
+			letter-spacing: -0.02em;
+			padding: 0;
+			font-weight: bold;
+		}
+
+		/* Add flat shadow below text */
+		.nav-brand #typewriter {
+			position: relative;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			color: transparent;
+			display: inline-block;
+		}
+
+		.nav-brand .typewriter-cursor {
+			display: inline-block;
+			width: 2px;
+			height: 1.2em;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			margin-left: 2px;
+			vertical-align: middle;
+			animation: blink 1s step-end infinite;
+		}
+
+		.dark .nav-brand .typewriter-cursor {
+			background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%);
+		}
+
+		.nav-brand #typewriter::after {
+			content: '';
+			position: absolute;
+			bottom: -4px;
+			left: 0;
+			width: 100%;
+			height: 4px;
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(102, 126, 234, 0.2),
+				rgba(102, 126, 234, 0.2), 
+				transparent
+			);
+			border-radius: 4px;
+		}
+
+		.dark .nav-brand #typewriter::after {
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(118, 75, 162, 0.2),
+				rgba(118, 75, 162, 0.2), 
+				transparent
+			);
+		}
+
+		.dark .nav-brand {
+			text-shadow: 
+				0 1px 2px rgba(118, 75, 162, 0.2),
+				0 2px 4px rgba(118, 75, 162, 0.2),
+				0 4px 8px rgba(118, 75, 162, 0.1),
+				0 8px 16px rgba(118, 75, 162, 0.1);
+		}
+
+		.nav-brand::after {
+			display: none;
+		}
+
+		.nav-brand:hover::after {
+			transform: scaleX(1);
+		}
+
+		/* Smooth Calculator Section Transitions */
+		.calculator-section {
+			transition: opacity var(--fade-transition),
+						transform var(--fade-transition);
+			will-change: transform, opacity;
+			min-height: calc(100vh - var(--header-height) - var(--search-height) - 3rem); /* Add this line */
+			padding: 1.5rem;
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.calculator-section[style*="display: none"] {
+			transform: translateY(10px) scale(0.98);
+			opacity: 0;
+		}
+
+		.calculator-section[style*="display: block"] {
+			transform: translateY(0) scale(1);
+			opacity: 1;
+		}
+
+        .nav-brand:hover {
+            transform: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+		/* Fix icon alignment */
+		.nav-brand svg {
+			color: #667eea;
+			width: 32px;
+			height: 32px;
+			flex-shrink: 0;
+		}
+
+		.dark .nav-brand svg {
+			color: #764ba2;
+		}
+
+        /* Enhanced Search Bar */
+        .search-container {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            height: var(--search-height);
+            z-index: 999;
+            background: var(--card-light);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1rem;
+            border-bottom: 1px solid var(--border-light);
+            opacity: 0;
+            transform: translateY(-10px);
+            display: none;
+			transition: 
+				opacity var(--fade-transition),
+				transform var(--fade-transition);
+			will-change: transform, opacity;		
+        }
+
+        .calculator-page .search-container {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dark .search-container {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 40px;
+            padding: 0 1rem 0 3rem;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: inherit;
+            font-size: 1rem;
+            transition: all var(--transition-speed) ease;
+            border: 1px solid var(--border-light);
+        }
+
+        .dark .search-input {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-dark);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #A18CD1;
+            box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* Main Container */
+		.container {
+			position: fixed;
+			top: var(--header-height);
+			left: 0;
+			right: 0;
+			bottom: 0;
+			overflow-y: auto;
+			overflow-x: hidden;
+			padding: 1rem;
+			transition: padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			height: calc(100vh - var(--header-height));
+			display: flex;
+			flex-direction: column;
+			
+			height: calc((var(--vh, 1vh) * 100) - var(--header-height));
+			-webkit-overflow-scrolling: touch;
+			
+        }
+
+        .calculator-page .container {
+			top: calc(var(--header-height) + var(--search-height));
+			height: calc(100vh - var(--header-height) - var(--search-height));
+			padding-bottom: calc(var(--footer-height) + 1rem);
+
+			height: calc((var(--vh, 1vh) * 100) - var(--header-height) - var(--search-height));
+        }
+
+		.main-content {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			min-height: 0; /* Important for proper flex behavior */
+			max-width: 800px;
+			margin: 0 auto;
+			width: 100%;
+		}
+
+        /* Page Layout */
+		.page {
+			position: absolute;
+			width: 100%;
+			height: calc(100% - var(--header-height));
+			opacity: 0;
+			visibility: hidden;
+			transform: translateY(20px) scale(0.98);
+			transition: 
+				opacity var(--page-transition),
+				transform var(--page-transition),
+				visibility 0s linear var(--page-transition);
+			will-change: transform, opacity;
+		}
+
+		.page.active {
+			opacity: 1;
+			visibility: visible;
+			transform: translateY(0) scale(1);
+			transition: 
+				opacity var(--page-transition),
+				transform var(--page-transition),
+				visibility 0s linear;
+			position: relative;
+		}
+
+
+
+		/* History Header Styling */
+		.history-header {
+			display: flex;
+			align-items: flex-start;
+			gap: 1rem;
+			margin-bottom: 1.5rem;
+			padding-bottom: 1rem;
+			border-bottom: 1px solid var(--border-light);
+		}
+
+		.dark .history-header {
+			border-color: var(--border-dark);
+		}
+
+		.history-icon {
+			color: #667eea;
+			width: 32px;
+			height: 32px;
+			flex-shrink: 0;
+		}
+
+		.dark .history-icon {
+			color: #764ba2;
+		}
+
+		.history-title {
+			position: relative;
+			margin-bottom: 0.5rem;
+			display: flex;
+			align-items: center;
+		}
+
+		.dark #history-title::before,
+		.dark #about-title::before {
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(118, 75, 162, 0.2),
+				rgba(118, 75, 162, 0.2), 
+				transparent
+			);
+		}
+
+		#history-title,
+		#about-title {
+			position: relative;
+			font-size: 1.25rem;
+			font-weight: 600;
+/*			display: inline-flex;	*/
+			align-items: center;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			color: transparent;
+
+			display: inline-block;			
+			
+		}
+
+		.dark #history-title::after,
+		.dark #about-title::after {
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(118, 75, 162, 0.2),
+				rgba(118, 75, 162, 0.2), 
+				transparent
+			);
+		}
+
+
+		#history-title::after,
+		#about-title::after {
+			content: '';
+			position: absolute;
+			bottom: -4px;
+			left: 0;
+			width: 100%;
+			height: 4px;
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(102, 126, 234, 0.2),
+				rgba(102, 126, 234, 0.2), 
+				transparent
+			);
+			border-radius: 4px;
+		}
+
+		.title-shadow {
+			position: absolute;
+			bottom: -4px;
+			left: 0;
+			width: 0;
+			height: 4px;
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(102, 126, 234, 0.2),
+				rgba(102, 126, 234, 0.2), 
+				transparent
+			);
+			border-radius: 4px;
+			transition: width 0.3s ease;
+		}
+
+
+
+		/* Add flat shadow below History title */
+		.history-title::before {
+			content: '';
+			position: absolute;
+			bottom: -4px;
+			left: 0;
+			width: 100%;
+			height: 4px;
+			border-radius: 4px;
+			transition: transform 0.3s ease;
+		}
+
+		.title-cursor {
+			display: inline-block;
+			margin-left: 2px;
+			width: 2px;
+			height: 1.2em;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			animation: blink 1s step-end infinite;
+			opacity: 0.7;
+		}
+
+
+		/* Hover effects */
+		.title-container:hover .title-shadow {
+			transform: scaleX(1.1);
+		}
+
+		.dark .history-icon,
+		.dark .about-header svg {
+			color: #764ba2;
+		}
+
+
+		.dark .title-shadow {
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(118, 75, 162, 0.2),
+				rgba(118, 75, 162, 0.2), 
+				transparent
+			);
+		}
+
+		.history-title:hover::before,
+		#about-title:hover::before {
+			transform: scaleX(1.1);
+		}
+
+		/* Dark mode adjustments */
+		.dark .history-title::before,
+		.dark #about-title::before {
+		}
+
+		/* Dark mode adjustments */
+		.dark .history-title::before {
+		}
+
+		.history-description {
+			font-size: 0.9rem;
+			opacity: 0.7;
+			line-height: 1.5;
+			margin: 0;
+		}
+
+		/* Enhanced History List Styling */
+		.history-list {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.history-entry {
+			position: relative;
+			margin-bottom: 1rem; /* Add this line */
+			
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			transform-origin: center;
+			opacity: 1;
+			transform: scale(1) translateY(0);
+			will-change: transform, opacity;			
+			
+		}
+
+		.history-entry.fade-out {
+			opacity: 0;
+			transform: scale(0.95) translateY(10px);
+		}
+
+		.history-entry.fade-in {
+			animation: fadeInEntry 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+		}
+
+
+		@keyframes fadeInEntry {
+			from {
+				opacity: 0;
+				transform: scale(0.95) translateY(10px);
+			}
+			to {
+				opacity: 1;
+				transform: scale(1) translateY(0);
+			}
+		}
+
+		.history-entry:hover {
+			transform: translateY(-2px);
+		}
+
+		.history-empty {
+			text-align: center;
+			padding: 3rem 1rem;
+			color: var(--text-light);
+			opacity: 0.7;
+		}
+
+		.dark .history-empty {
+			color: var(--text-dark);
+		}
+		
+
+
+		.delete-history {
+			position: absolute;
+			top: 50%;
+			right: 0.75rem;
+			transform: translateY(-50%);
+			width: 32px;
+			height: 32px;
+			border-radius: 8px;
+			border: none;
+			background: rgba(255, 87, 87, 0.1);
+			color: #FF5757;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all var(--transition-speed) ease;
+			z-index: 2;
+			
+		}
+
+		.delete-history:hover {
+			background: rgba(255, 87, 87, 0.2);
+			transform: translateY(-50%) scale(1.05);
+		}
+
+		.delete-history svg {
+			width: 16px;
+			height: 16px;
+			stroke-width: 2;
+		}
+		
+
+        /* Enhanced About page styles */
+        .about-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+			margin-bottom: 1rem;
+        }
+
+        .dark .feature-card {
+            border-color: var(--border-dark);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: #A18CD1;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: inherit;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            line-height: 1.5;
+        }
+
+
+        /* Calculator Menu */
+        .calculator-menu {
+			position: relative;
+			width: 100%;
+			height: 280px; /* Reduced fixed height */
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			perspective: 2000px;
+			margin: 1rem 0;
+			flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .calculator-list {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Calculator Cards */
+        .calculator-button {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            padding: 2rem;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            text-align: left;
+            color: white;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+			transition: 
+				transform var(--scale-transition),
+				opacity var(--scale-transition),
+				background-color var(--scale-transition);
+			will-change: transform, opacity;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            touch-action: manipulation;
+        }
+
+        .calculator-button[data-calculator="logReduction"] { background: var(--log-reduction); }
+        .calculator-button[data-calculator="dilution"] { background: var(--dilution); }
+        .calculator-button[data-calculator="cfu"] { background: var(--cfu); }
+        .calculator-button[data-calculator="media"] { background: var(--media); }
+		.calculator-button[data-calculator="ethanol"] { background: var(--ethanol); }
+		.calculator-button[data-calculator="buffer"] { background: var(--buffer); }
+		.calculator-button[data-calculator="bufferPh"] { background: var(--buffer-ph); }
+
+        .calculator-button.active {
+            transform: translate(-50%, -50%) scale(1) translateZ(40px);
+            z-index: 4;
+        }
+
+        .calculator-button:not(.active) {
+            transform: translate(-50%, -50%) scale(0.9) translateZ(-40px);
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        .calculator-button.prev {
+            transform: translate(-100%, -50%) scale(0.8) translateZ(-80px);
+            z-index: 2;
+        }
+
+        .calculator-button.next {
+            transform: translate(0%, -50%) scale(0.8) translateZ(-80px);
+            z-index: 2;
+        }
+
+        .calculator-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            background: linear-gradient(45deg, 
+                rgba(255,255,255,0.1), 
+                rgba(255,255,255,0.2)
+            );
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .calculator-button:hover::before {
+            opacity: 1;
+        }
+
+        .calculator-icon {
+            width: 32px;
+            height: 32px;
+            stroke: white;
+            stroke-width: 2;
+            margin-bottom: 1rem;
+        }
+
+        .calculator-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+			margin-bottom: 1rem;
+        }
+
+        .calculator-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.4;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+			margin-bottom: 1rem;
+        }
+
+        /* Calculator Content */
+        .calculator-content {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			background: var(--card-light);
+			border-radius: 24px;
+			border: 1px solid var(--border-light);
+			margin: 0 auto;
+			width: 100%;
+			max-width: 800px;
+			overflow: hidden; /* Contain child elements */
+			position: relative;
+			padding: 1rem;
+        }
+
+        @supports (backdrop-filter: blur(10px)) {
+            .calculator-content {
+                backdrop-filter: blur(10px);
+            }
+        }
+
+        .dark .calculator-content {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: inherit;
+            opacity: 0.7;
+        }
+
+		.input-wrapper {
+			position: relative;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 20px;
+			border: 1px solid var(--border-light);
+			transition: all var(--transition-speed) ease;
+			display: flex;
+			align-items: center;
+		}
+
+        .dark .input-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-dark);
+        }
+
+		.input {
+			width: 100%;
+			padding: 0.75rem 1rem;
+			padding-right: 5.5rem; /* Increased to accommodate unit selector */
+			background: transparent;
+			border: none;
+			color: inherit;
+			font-size: 0.8rem;
+		}
+
+        .input:focus {
+            outline: none;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #A18CD1;
+            box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.2);
+			transform: translateY(-2px);
+			transition: transform var(--scale-transition);
+        }
+
+		.input-unit.no-select {
+			pointer-events: none; /* Disable interactions */
+		}
+
+		.input-unit {
+			position: absolute;
+			right: 1rem;
+			top: 50%;
+			transform: translateY(-50%);
+			opacity: 0.7;
+			font-size: 0.9rem;
+			pointer-events: none;
+		}
+
+		.input-unit.has-select {
+			display: flex;
+			align-items: center;
+			gap: 0.25rem;
+			pointer-events: all;
+		}
+
+		/* Only show arrow for buffer calculator's select unit */
+		.input-unit.has-select:after {
+			content: '';
+			position: absolute;
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 0;
+			height: 0;
+			border-left: 4px solid transparent;
+			border-right: 4px solid transparent;
+			border-top: 4px solid currentColor;
+			pointer-events: none;
+			opacity: 0.7;
+		}
+
+		.input-unit select {
+			background: transparent;
+			border: none;
+			color: inherit;
+			font-size: 0.9rem;
+			cursor: pointer;
+			padding: 0 0.5rem;
+			appearance: none;
+			-webkit-appearance: none;
+			outline: none;
+		}
+
+		.input-unit select:focus {
+			outline: none;
+		}
+
+		.input-unit .unit-label {
+			opacity: 0.7;
+		}
+
+
+
+        /* Calculation Steps */
+		.calculation-steps {
+			margin-top: 1.5rem;
+			padding: 1rem;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			border: 1px solid var(--border-light);
+			animation: slideUp var(--transition-speed) ease-out;
+			margin-bottom: 1rem;
+		}
+
+		.step {
+			position: relative;
+			padding: 1.25rem;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			border: 1px solid var(--border-light);
+			margin-bottom: 1rem;
+			transition: all var(--transition-speed) ease;
+		}
+
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+		.step-number {
+			position: absolute;
+			top: -12px;
+			left: -12px;
+			width: 28px;
+			height: 28px;
+			border-radius: 50%;
+			background: var(--dilution);
+			color: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: bold;
+			font-size: 0.9rem;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+
+		.step-content {
+			flex: 1;              /* Keep this existing property */
+			width: 100%;          /* Add this new property */
+		}
+
+		.step-title {
+			font-weight: 600;
+			margin-bottom: 0.75rem;
+			color: inherit;
+			padding-left: 1rem;
+		}
+
+		.step-formula {
+			font-family: monospace;
+			padding: 0.75rem;
+			background: rgba(0, 0, 0, 0.2);
+			border-radius: 8px;
+			margin: 0.5rem 0;
+			overflow-x: auto;
+			word-break: break-word;
+			white-space: pre-wrap;
+			font-size: 0.9rem;
+			line-height: 1.4;
+			background: rgb(119 119 119 / 10%);
+		}
+
+		.dark .step-formula {
+			background: rgba(255, 255, 255, 0.1);
+		}
+
+        /* Result Display */
+		.result {
+			padding: 1.25rem 1rem;
+			padding-right: 3rem; /* Space for delete button */
+			background: #f6f2ff73;
+			border-radius: 12px;
+			border: 1px solid rgb(0 0 0 / 10%);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			transform-origin: top;
+			transition: 
+				opacity var(--fade-transition),
+				transform var(--fade-transition);
+			will-change: transform, opacity;
+		}
+
+		.result[style*="display: none"] {
+			transform: translateY(-10px) scale(0.98);
+			opacity: 0;
+		}
+
+		.result[style*="display: block"] {
+			transform: translateY(0) scale(1);
+			opacity: 1;
+		}
+
+        .dark .result {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-dark);
+			border-radius: 12px;
+			border: 1px solid rgb(255 255 255 / 10%);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #A18CD1;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+			max-width: calc(100% - 0.05rem);
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-note {
+            font-size: 0.9rem;
+            opacity: 1;
+            line-height: 1.5;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Bottom Navigation */
+		.bottom-nav {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			height: var(--footer-height);
+			background: var(--card-light);
+			backdrop-filter: blur(10px);
+			border-top: 1px solid var(--border-light);
+			display: flex;
+			justify-content: center;
+			align-items: center;  /* Added for vertical centering */
+			gap: 4rem;
+			z-index: 1000;
+			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			transform: translateY(0);
+			padding: 0 1rem;  /* Added padding */
+			width: 100%;  /* Ensure full width */
+		}
+
+
+		.bottom-nav.hidden {
+			transform: translateY(100%);
+		}
+
+		.bottom-nav.visible {
+			transform: translateY(0);
+		}
+
+		/* Nav Toggle Button */
+		.nav-toggle {
+			position: fixed;
+			bottom: 5.5rem;
+			right: 2rem;
+			width: 48px;
+			height: 48px;
+			border-radius: 24px;
+			background: var(--card-light);
+			border: 1px solid var(--border-light);
+			color: black;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 1001;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+			transform: translateY(0);
+			opacity: 1;
+		}
+
+		.nav-toggle.hidden {
+			transform: translateY(calc(var(--footer-height) + 1rem));
+		}
+
+		.nav-toggle:hover {
+			opacity: 1;
+
+		}
+
+		.nav-toggle svg {
+			width: 24px;
+			height: 24px;
+			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.nav-toggle.active svg {
+			transform: rotate(180deg);
+		}
+
+		/* Dark mode adjustments */
+		.dark .nav-toggle {
+			background: var(--card-dark);
+			border: 1px solid var(--border-dark);
+			color: inherit;
+		}
+
+
+        .dark .bottom-nav {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+
+		.bottom-nav-item {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.1rem;
+			color: inherit;
+			opacity: 0.7;
+			border: none;
+			background: none;
+			cursor: pointer;
+			padding: 0.5rem;
+			position: relative;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.bottom-nav-item::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			width: 0;
+			height: 3px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			transform: translateX(-50%);
+			transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			border-radius: 4px 4px 0 0;
+		}
+
+		.bottom-nav-item.active::after {
+			width: 50%;
+		}
+
+		.bottom-nav-item svg {
+			width: 28px;
+			height: 28px;
+			transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.bottom-nav-item:hover svg {
+			transform: translateY(-4px) scale(1.1);
+			color: #667eea;
+		}
+
+        .bottom-nav-item.active {
+            opacity: 1;
+        }
+
+		.bottom-nav-item.active svg {
+			color: #667eea;
+			animation: iconPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+		}
+
+		.bottom-nav-item span {
+			font-size: 0.8rem;
+			font-weight: 500;
+			transform: translateY(0);
+			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.bottom-nav-item:hover span {
+			transform: translateY(-2px);
+		}
+
+        /* Icon Buttons */
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: inherit;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icon-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, 
+                rgba(255,255,255,0.1), 
+                rgba(255,255,255,0.2)
+            );
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+		@keyframes iconPulse {
+			0%, 100% {
+				transform: scale(1) translateY(0);
+			}
+			50% {
+				transform: scale(1.1) translateY(-4px);
+			}
+		}
+
+
+		/* Add ripple effect */
+		.bottom-nav-item .ripple {
+			position: absolute;
+			border-radius: 50%;
+			transform: scale(0);
+			animation: ripple 0.6s linear;
+			background-color: rgba(102, 126, 234, 0.2);
+		}
+
+		@keyframes ripple {
+			to {
+				transform: scale(4);
+				opacity: 0;
+			}
+		}
+
+		/* Dark mode adjustments */
+		.dark .bottom-nav-item::after {
+			background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%);
+		}
+
+		.dark .bottom-nav-item.active svg,
+		.dark .bottom-nav-item:hover svg {
+			color: #A18CD1;
+		}
+
+
+        .icon-button:hover {
+            transform: translateY(-0px);
+        }
+
+        .icon-button:hover::before {
+            opacity: 1;
+        }
+
+        .icon-button svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Calculate Button */
+		.calculate-button {
+			width: 100%;
+			padding: 1rem;
+			border: none;
+			border-radius: 100px;
+			background: #9917FF; /* Brighter purple base */
+			background: linear-gradient(135deg, #9F6EFF 0%, #8A4FFF 100%);
+			color: white;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			margin: 1rem 0;
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			font-size: 1rem;
+			letter-spacing: -0.01em;
+			box-shadow: 0 4px 12px -2px rgba(153, 23, 255, 0.2), 0 6px 12px -2px rgba(153, 23, 255, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.01);
+		}
+
+		.calculate-button svg {
+			width: 18px;
+			height: 18px;
+			fill: none;
+			stroke: currentColor;
+			stroke-width: 2;
+			stroke-linecap: round;
+			stroke-linejoin: round;
+			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.calculate-button.spinning svg {
+			transform: rotate(360deg);
+		}
+
+		/* Optional: Add a subtle scale effect when spinning */
+		.calculate-button.spinning {
+			transform: scale(0.98);
+		}
+
+		.calculate-button::before {
+			content: '';
+			position: absolute;
+			top: 1px;
+			left: 1px;
+			right: 1px;
+			height: 50%;
+			background: linear-gradient(180deg, 
+				rgba(255, 255, 255, 0.15) 0%, 
+				rgba(255, 255, 255, 0) 100%);
+			border-radius: 100px 100px 0 0;
+			opacity: 0.5;
+		}
+
+		/* Drop shadow effect */
+		.calculate-button::after {
+			content: '';
+			position: absolute;
+			inset: -1px;
+			background: inherit;
+			border-radius: inherit;
+			filter: blur(8px); /* Reduced blur */
+			opacity: 0.25; /* Reduced opacity */
+			z-index: -1;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+
+		.calculate-button:hover {
+			transform: translateY(-1px);
+			background: linear-gradient(135deg, #A679FF 0%, #955AFF 100%);
+			box-shadow: 
+			0 6px 16px -2px rgba(153, 23, 255, 0.2),
+			0 8px 14px -2px rgba(153, 23, 255, 0.1),
+			0 0 0 1px rgba(255, 255, 255, 0.05);
+		}
+
+
+		.calculate-button:hover::after {
+			opacity: 0.3;
+			filter: blur(10px);
+		}
+
+		.calculate-button:active {
+			transform: translateY(1px);
+		}
+
+		/* Dark mode adjustments */
+		.dark .calculate-button {
+			background: linear-gradient(135deg, #8A4FFF 0%, #7B3FFF 100%);
+			box-shadow: 
+				0 4px 12px -2px rgba(153, 23, 255, 0.4),
+				0 6px 12px -2px rgba(153, 23, 255, 0.3),
+				0 0 0 1px rgba(255, 255, 255, 0.03);
+		}
+
+		.dark .calculate-button:hover {
+			background: linear-gradient(135deg, #955AFF 0%, #8A4FFF 100%);
+			box-shadow: 
+				0 6px 16px -2px rgba(153, 23, 255, 0.5),
+				0 8px 14px -2px rgba(153, 23, 255, 0.4),
+				0 0 0 1px rgba(255, 255, 255, 0.05);
+		}
+
+		.dark .calculate-button::after {
+			opacity: 0.3;
+		}
+
+		.dark .calculate-button:hover::after {
+			opacity: 0.35;
+		}
+
+
+
+		.step-formula::-webkit-scrollbar {
+			height: 4px;
+		}
+
+		.step-formula::-webkit-scrollbar-track {
+			background: rgba(0, 0, 0, 0.1);
+			border-radius: 2px;
+		}
+
+		.step-formula::-webkit-scrollbar-thumb {
+			background: var(--dilution);
+			border-radius: 2px;
+		}
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+		@keyframes float {
+			0%, 100% {
+				transform: translate(0, -50%);
+			}
+			50% {
+				transform: translate(0, calc(-50% - 10px));
+			}
+		}
+
+
+		@keyframes blink {
+			0%, 100% { opacity: 0.7; }
+			50% { opacity: 0; }
+		}
+
+
+
+		/* About Header Styling */
+		.about-header {
+			position: relative;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			margin-bottom: 1rem;
+		}
+
+		.about-header svg {
+			color: #667eea;
+			width: 32px;
+			height: 32px;
+			flex-shrink: 0;
+		}
+
+		.dark .about-header svg {
+			color: #764ba2;
+		}
+
+
+		.dark #about-title::after {
+			background: linear-gradient(90deg, 
+				transparent, 
+				rgba(118, 75, 162, 0.2),
+				rgba(118, 75, 162, 0.2), 
+				transparent
+			);
+		}
+
+
+
+		/* Add this to your CSS */
+		.input-wrapper select.buffer-select {
+			padding-right: 2.5rem; /* Space for arrow */
+		}
+
+		.input-wrapper .buffer-select-wrapper {
+			position: relative;
+			width: 100%;
+		}
+
+		.input-wrapper .buffer-select-wrapper::after {
+			content: '';
+			position: absolute;
+			right: 1rem;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 0;
+			height: 0;
+			border-left: 4px solid transparent;
+			border-right: 4px solid transparent;
+			border-top: 4px solid currentColor;
+			pointer-events: none;
+			opacity: 0.7;
+		}
+
+
+		/* Welcome Page Styles */
+		.welcome-content {
+			padding: 1.5rem;
+			animation: fadeInUp 0.6s ease-out;
+		}
+
+		.welcome-header {
+			padding: 1.5rem 1rem;
+			position: relative;
+			z-index: 2;
+			margin-bottom: 2rem;  /* Add some space below */		
+		}
+
+		.welcome-text-content {
+			max-width: 100%;
+			background: rgba(255, 255, 255, 0.1);  /* Transparent white background */
+			backdrop-filter: blur(8px);  /* Blur effect */
+			-webkit-backdrop-filter: blur(8px);  /* For Safari */
+			border-radius: 16px;  /* Rounded corners */
+			padding: 1.5rem;  /* Add some padding */
+			border: 1px solid rgba(255, 255, 255, 0.2);  /* Subtle border */
+			box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);  /* Soft shadow */
+			z-index: 10;  /* Ensure it stays on top */			
+		}
+
+		.dark .welcome-text-content {
+			background: rgba(45, 52, 54, 0.1);  /* Darker transparent background */
+			border-color: rgba(255, 255, 255, 0.1);  /* Subtle border for dark mode */
+		}
+
+		.welcome-images-container {
+			position: relative;
+			width: 100%;
+			height: 200px;
+			margin: 1rem 0;
+			overflow: visible;
+			z-index: 1; /* Add z-index */
+		}
+
+		.welcome-images {
+			position: relative;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		/* Image Styles */
+		.scientist-image {
+			position: absolute;
+			height: 170%;
+			width: auto;
+			right: 20%;
+			top: -27%;
+			transform: translate(0, -50%);
+			z-index: 2;
+			opacity: 0;
+			pointer-events: none; /* Add this */
+			filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));  /* Add this */
+
+			transform: translateX(100%); /* Start from right */
+			animation: slideInRightBoy 1s ease-out forwards,
+					  floatBoy 3s ease-in-out infinite 1s; /* Delay float until entry completes */			
+		}
+
+		@keyframes slideInRightBoy {
+			0% {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+			100% {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		@keyframes floatBoy {
+			0%, 100% {
+				transform: translateY(0);
+			}
+			50% {
+				transform: translateY(-10px);
+			}
+		}
+
+		.flask-image {
+			position: absolute;
+			height: 75%;
+			width: auto;
+			left: 30%;
+			top: 50%;
+			z-index: 1;
+			opacity: 0; /* Start hidden */
+			transform: translateX(-100%); /* Start from left */
+			animation: slideInLeftFlask 1s ease-out forwards,
+					  floatFlask 3s ease-in-out infinite 1.3s; /* Delay float until entry completes */
+			pointer-events: none; /* Add this */
+			filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));  /* Add this */
+		}
+
+		@keyframes slideInLeftFlask {
+			0% {
+				transform: translateX(-100%);
+				opacity: 0;
+			}
+			100% {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		@keyframes floatFlask {
+			0%, 100% {
+				transform: translateY(0);
+			}
+			50% {
+				transform: translateY(-10px);
+			}
+		}
+
+
+		/* Animations */
+		@keyframes slideInRight {
+			from {
+				transform: translate(100px, -50%);
+				opacity: 0;
+			}
+			to {
+				transform: translate(0, -50%);
+				opacity: 1;
+			}
+		}
+
+
+		@keyframes slideInLeft {
+			from {
+				transform: translate(-100px, -50%);
+				opacity: 0;
+			}
+			to {
+				transform: translate(0, -50%);
+				opacity: 1;
+			}
+		}
+
+
+
+
+		/* Dark Mode Adjustments */
+		.dark .scientist-image,
+		.dark .flask-image {
+			filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4))  /* Darker shadow for dark mode */
+				   brightness(0.9) contrast(1.1);  /* Keep your existing filters */
+		}
+
+		.welcome-icon {
+			color: #667eea;
+			margin-bottom: 1rem;
+			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+		}
+
+		.dark .welcome-icon {
+			color: #764ba2;
+		}
+
+		.welcome-title {
+			position: relative;
+			height: 2.5rem; /* Fixed height for the container */
+			display: flex;
+			align-items: center;
+			margin-bottom: 0.5rem;
+			overflow: hidden; /* Prevent text overflow */
+		}
+
+
+
+		.welcome-title .title-cursor {
+			display: inline-block;
+			width: 2px;
+			height: 1.2em;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			margin-left: 2px;
+			vertical-align: middle;
+			animation: blink 1s step-end infinite;
+			position: absolute;
+			left: 100%; /* Position cursor after the text */
+			margin-left: 2px;
+		}
+
+		.dark .welcome-title .title-cursor {
+			background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%);
+		}
+
+		/* Add smooth fade transition */
+		.welcome-title {
+			transition: opacity 0.3s ease;
+		}
+
+		.title-wrapper {
+			position: relative;
+			display: inline-block;
+			z-index: 2;
+		}
+
+		/* Add specific styling for the welcome title text */
+		#welcome-title {
+			position: absolute; /* Position the text absolutely */
+			left: 0;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			-webkit-background-clip: text;
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+			font-weight: bold;
+			white-space: wrap; /* Prevent text wrapping */
+			
+			font-size: 1.5rem;  /* Slightly larger */
+			margin-bottom: 0.75rem;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Subtle text shadow */			
+			
+		}
+
+		.dark #welcome-title {
+			background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%);
+			-webkit-background-clip: text;
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
+
+		.welcome-description {
+			font-size: 1rem;
+			opacity: 0.9;  /* Slightly more visible */
+			line-height: 1.6;
+			margin: 0;
+		}
+
+		.welcome-features {
+			display: flex;
+			flex-direction: column;
+			gap: 2rem;
+		}
+
+		.welcome-section {
+			animation: fadeInUp 0.6s ease-out;
+			z-index: 10;
+		}
+
+		.section-title {
+			font-size: 1.25rem;
+			font-weight: 600;
+			margin-bottom: 1rem;
+			color: inherit;
+		}
+
+		.quick-actions {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 1rem;
+			margin-bottom: 1rem;
+			width: 100%;
+		}
+
+		.quick-action-card {
+			aspect-ratio: 1; /* Force square shape */
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 1.5rem;
+			background: var(--card-gradient);
+			border-radius: 16px;
+			color: white;
+			cursor: pointer;
+			transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+			gap: 0.75rem;
+			min-height: 100%; /* Set minimum height */
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			position: relative;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.quick-action-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+		}
+
+		.quick-action-card svg {
+			width: 32px;
+			height: 32px;
+			stroke: currentColor;
+		}
+
+		.quick-action-card span {
+			font-weight: 500;
+			font-size: 0.9rem;
+			text-align: center;
+		}
+
+		.welcome-history {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 0.75rem;
+			width: 100%;
+		}
+
+		.welcome-history .history-entry {
+			width: 100%;
+			margin-bottom: 0;
+			aspect-ratio: 1.5; /* This ensures consistent card heights */
+		}
+
+		.welcome-history .result {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			
+			min-height: auto;
+			padding: 1rem;
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+			
+			height: 100%;
+			margin: 0;			
+			
+		}
+
+		.welcome-history .result:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+		}
+
+		.welcome-history .result-title {
+			font-size: 0.9rem;
+			margin-bottom: 0.5rem;
+		}
+
+		.welcome-history .result-value {
+			font-size: 1.1rem;
+			margin-bottom: 0.5rem;
+		}
+
+		.welcome-history .result-note {
+			font-size: 0.8rem;
+			opacity: 0.9;
+		}
+
+		.welcome-page .welcome-history svg {
+			width: 24px;
+			height: 24px;
+		}
+
+		.guide-steps {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.guide-step {
+			display: flex;
+			align-items: flex-start;
+			gap: 1rem;
+			padding: 1rem;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			border: 1px solid var(--border-light);
+			transition: all var(--transition-speed) ease;
+		}
+
+		.dark .guide-step {
+			border-color: var(--border-dark);
+		}
+
+		.guide-step:hover {
+			transform: translateX(4px);
+		}
+
+		.step-icon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 48px;
+			height: 48px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 12px;
+			flex-shrink: 0;
+		}
+
+		.step-icon svg {
+			color: white;
+		}
+
+		.step-content {
+			flex: 1;
+		}
+
+		.step-content h3 {
+			font-size: 1.1rem;
+			font-weight: 600;
+			margin-bottom: 0.5rem;
+			color: inherit;
+		}
+
+		.step-content p {
+			font-size: 0.9rem;
+			opacity: 0.7;
+			line-height: 1.5;
+		}
+
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+
+		/* Dark mode adjustments */
+		.dark .quick-action-card {
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			border: 1px solid rgba(255, 255, 255, 0.05);
+		}
+
+		.dark .welcome-history .result {
+			border: 1px solid rgba(255, 255, 255, 0.05);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+
+
+		/* Add this in the CSS section, after .delete-history styles */
+		.favorite-history {
+		position: absolute;
+			top: 17%;
+			right: 0.75rem;
+			transform: translateY(-50%);
+			width: 32px;
+			height: 32px;
+			border-radius: 8px;
+			background: rgba(255, 255, 255, 0.1);
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all var(--transition-speed) ease;
+			z-index: 2;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			background: rgba(255, 255, 255, 0.2);
+			color: white;
+		}
+
+		.favorite-history:hover {
+			background: rgba(255, 255, 255, 0.2);
+			transform: translateY(-50%) scale(1.05);
+		}
+
+		.favorite-history.active {
+			color: #ff8888;
+			background: rgba(255, 255, 255, 0.2);
+		}
+
+		.favorite-history svg {
+			width: 16px;
+			height: 16px;
+			stroke-width: 2;
+		}
+
+		/* Add sorting controls styling */
+		.history-sort-controls {
+			display: flex;
+			gap: 0.5rem;
+			margin-bottom: 1.5rem;
+			padding: 0 0.5rem;
+		}
+
+		.sort-button {
+			position: relative;
+			width: 25%;
+			padding: 0.5rem 0.5rem;
+			border-radius: 24px;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			color: inherit;
+			cursor: pointer;
+
+			font-weight: 500;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			opacity: 0.75;
+			
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			overflow: hidden;		
+		}
+
+		.sort-button svg {
+			width: 18px;
+			height: 18px;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			margin-right: 0.0rem;
+		}
+
+		.sort-button .button-text {
+			position: absolute;
+			left: 0;
+			white-space: nowrap;
+			transform-origin: center;
+			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+						opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.sort-button .button-text.out {
+			transform: translateY(-100%);
+			opacity: 0;
+		}
+
+		.sort-button .button-text.in {
+			transform: translateY(0);
+			opacity: 1;
+		}
+
+		.sort-button .button-text-container {
+			position: relative;
+			display: inline-block;
+			height: 1.2em;
+			overflow: hidden;
+		}
+
+		.sort-button:hover {
+			background: rgba(255, 255, 255, 0.15);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+		.sort-button.active {
+			color: #ff6262;
+			border-color: transparent;
+			opacity: 0.75;
+		}
+
+		.dark .sort-button {
+			border-color: rgba(255, 255, 255, 0.1);
+			background: rgba(255, 255, 255, 0.05);
+		}
+
+		.dark .sort-button:hover {
+			background: rgba(255, 255, 255, 0.1);
+		}
+
+		.sort-button.active svg {
+			transform: scale(1.1);
+		}
+
+
+		/* Add these CSS rules */
+		.input-unit.select {
+		  background: transparent;
+		  border: none;
+		  color: inherit;
+		  cursor: pointer;
+		  padding-right: 1.5rem;
+		  appearance: none;
+		  -webkit-appearance: none;
+		  position: relative;
+		}
+
+		.input-unit.select:after {
+		  content: '';
+		  position: absolute;
+		  right: 0.5rem;
+		  top: 50%;
+		  transform: translateY(-50%);
+		  width: 0;
+		  height: 0;
+		  border-left: 4px solid transparent;
+		  border-right: 4px solid transparent;
+		  border-top: 4px solid currentColor;
+		}
+
+		.input-wrapper.has-select {
+		  padding-right: 0;
+		}
+
+		.buffer-ph-inputs {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		/* Style for disabled input but still visible */
+		.input-wrapper input:disabled {
+			opacity: 0.7;
+			cursor: not-allowed;
+			background: rgba(0, 0, 0, 0.05);
+		}
+
+		.dark .input-wrapper input:disabled {
+			background: rgba(255, 255, 255, 0.05);
+		}
+
+		/* Add styles for the select elements in buffer calculator */
+		.buffer-select {
+			width: 100%;
+			padding: 0.75rem 1rem;
+			background: transparent;
+			border: none;
+			color: inherit;
+			font-size: 1rem;
+			cursor: pointer;
+			appearance: none;
+			-webkit-appearance: none;
+		}
+
+		.buffer-select:focus {
+			outline: none;
+		}
+
+		/* Additional WebView-specific fixes */
+		@supports (-webkit-overflow-scrolling: touch) {
+			.welcome-history {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				width: 100%;
+			}
+			
+			.welcome-history .history-entry {
+				min-width: 0;
+				width: 100%;
+			}
+			
+			.welcome-history .result {
+				width: 100%;
+				height: 100%;
+				box-sizing: border-box;
+			}
+		}
+
+
+
+
+		@keyframes slideInLeftFlask {
+			0% {
+				transform: translateX(-100%);
+				opacity: 0;
+			}
+			100% {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		@keyframes floatFlask {
+			0%, 100% {
+				transform: translateY(0);
+			}
+			50% {
+				transform: translateY(-10px);
+			}
+		}
+
+
+
+
+
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .calculator-list {
+                width: 240px;
+                height: 240px;
+            }
+
+            .calculator-button {
+                width: 240px;
+                height: 240px;
+                padding: 1.5rem;
+				backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+
+            .calculator-title {
+                font-size: 1.25rem;
+				font-size: 1.25rem;
+                font-weight: 700;  /* Make text slightly bolder on mobile */
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+            }
+
+            .calculator-description {
+                font-size: 0.9rem;
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+            }
+
+            .bottom-nav {
+                gap: 1.5rem;
+                -webkit-backdrop-filter: none;
+                background: var(--card-light);
+				justify-content: space-around;  /* Even spacing on mobile */
+				padding: 0 0.5rem;  /* Smaller padding on mobile */
+				backdrop-filter: blur(10px);
+            }
+			
+			
+            .calculator-menu {
+                touch-action: none;  /* Prevents default touch handling */
+				height: 240px;
+				margin: 0.5rem 0;				
+            }
+
+            .calculator-content {
+                margin-top: 1rem;
+                z-index: 1;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: var(--card-light);
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+				border-radius: 20px;
+            }			
+			
+			
+			.step {
+                padding: 1.5rem 1rem 1rem;
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+			}
+			
+			.step-formula {
+                font-size: 0.85rem;
+                padding: 0.75rem 0.5rem;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                hyphens: auto;
+			}
+			
+			.result {
+                padding: 1.25rem 3rem 1.25rem 1rem;
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+			}
+			
+			.delete-history {
+				right: 0.5rem;
+			}
+			
+			.result-value, .result-note {
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                hyphens: auto;
+                max-width: calc(100% - 0.05rem);
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+			}
+
+			.nav-brand {
+				font-size: 1.25rem;
+				padding: 0.25rem 0.5rem;
+				letter-spacing: -0.05rem;
+			}
+
+			.page {
+				transform: translateY(10px) scale(0.99);
+			}
+
+			.calculator-section {
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+				padding: 1.25rem;
+				gap: 0.75rem;	
+				min-height: auto;
+				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				opacity: 1;
+				transform: translateY(0);				
+			}
+						
+			.calculator-section[style*="display: none"] {
+				opacity: 0;
+				transform: translateY(10px);
+			}
+			
+			/* Adjust bottom padding when bottom nav is visible */
+			.calculator-page .container {
+				padding-bottom: calc(var(--footer-height) + 0.75rem);
+			}		
+			
+			.dark .calculator-content {
+                background: var(--card-dark);
+				border-color: var(--border-dark);
+            }
+			
+            .calculator-title {
+                font-weight: 700;  /* Make text slightly bolder on mobile */
+            }
+			
+            .input, .result-value, .step-title {
+                font-weight: 600;
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+            }
+			
+			.bottom-nav-item::after {
+				height: 2px;
+			}		
+
+            .search-container {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: var(--card-light);
+            }			
+			
+            .dark .search-container {
+                background: var(--card-dark);
+            }
+
+            .dark .bottom-nav {
+                background: var(--card-dark);
+            }
+			
+            .search-input {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;			
+			}
+
+			.about-features {
+				gap: 0rem;
+			}
+					
+			.nav-toggle {
+				bottom: 4.75rem;
+				right: 0.65rem;
+				width: 40px;
+				height: 40px;
+				backdrop-filter: blur(10px);
+			}
+			
+			.nav-toggle svg {
+				width: 20px;
+				height: 20px;
+			}
+			
+			.bottom-nav-item {
+				padding: 0.25rem;  /* Reduced padding on mobile */
+			}			
+			
+			.bottom-nav-item svg {
+				width: 24px;  /* Slightly smaller icons on mobile */
+				height: 24px;
+			}
+	
+			.bottom-nav-item span {
+				font-size: 0.75rem;  /* Smaller text on mobile */
+			}
+			
+			.nav-toggle.hidden {
+				transform: translateY(calc(var(--footer-height) + 0.5rem));
+			}
+			.nav-toggle:hover {
+				opacity: 1;
+			}
+			
+			.welcome-content {
+				padding: 1rem;
+			}
+
+			.quick-actions {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.guide-step {
+				padding: 0.75rem;
+			}
+
+			.step-icon {
+				width: 40px;
+				height: 40px;
+			}
+
+			.step-icon svg {
+				width: 20px;
+				height: 20px;
+			}
+
+			.step-content h3 {
+				font-size: 1rem;
+			}
+
+			.step-content p {
+				font-size: 0.85rem;
+			}			
+
+			.welcome-history .result {
+				padding: 0.75rem;
+			}
+			
+			.container {
+				padding-bottom: calc(var(--footer-height) + env(safe-area-inset-bottom, 0px));
+			}
+			
+			.bottom-nav {
+				padding-bottom: env(safe-area-inset-bottom, 0px);
+				height: calc(var(--footer-height) + env(safe-area-inset-bottom, 0px));
+			}
+			
+			.nav-toggle {
+				bottom: calc(var(--footer-height) + 1rem + env(safe-area-inset-bottom, 0px));
+			}			
+
+			.welcome-history {
+				grid-template-columns: repeat(2, 1fr);
+				gap: 0.5rem;
+			}
+
+			.welcome-history .result-title {
+				font-size: 0.8rem;
+				margin-bottom: 0.25rem;
+			}
+
+			.welcome-history .result-value {
+				font-size: 0.95rem;
+				margin-bottom: 0.25rem;
+				word-break: break-word;
+			}
+
+			.welcome-history .result-note {
+				font-size: 0.75rem;
+				opacity: 0.9;
+			}
+
+			.welcome-history .history-entry {
+				aspect-ratio: 1.25; /* Slightly more compact on mobile */
+			}
+			
+			/* Force equal widths in the grid */
+			.welcome-history > * {
+				width: 100% !important;
+				min-width: 0;
+			}			
+
+
+			.welcome-header {
+				flex-direction: column;
+				padding: 0.5rem;
+			}
+
+			.welcome-images {
+				position: relative;
+				width: 100%;
+				height: 200px;
+				margin-top: 1rem;
+			}
+
+			.welcome-images-container {
+				height: 160px;
+				margin: 0.5rem 0;
+			}
+
+			.scientist-image {
+				height: 170%;
+				top: -45%;
+				left: 15%;
+				opacity: 0; /* Start hidden */
+				transform: translateX(100%); /* Start from right */
+				animation: slideInRightBoy 1s ease-out forwards,
+						  floatBoy 3s ease-in-out infinite 1s; /* Delay float until entry completes */
+			}
+
+			.flask-image {
+				height: 105px;
+				left: 5%;
+				top: 30%;
+				opacity: 0; /* Start hidden */
+				transform: translateX(-100%); /* Start from left */
+				animation: slideInLeftFlask 1s ease-out 0.3s forwards,
+						  floatFlask 3s ease-in-out infinite 1.3s; /* Delay float until entry completes */
+			}
+
+			@keyframes slideInRightBoy {
+				0% {
+					transform: translateX(100%);
+					opacity: 0;
+				}
+				100% {
+					transform: translateX(0);
+					opacity: 1;
+				}
+			}
+
+			@keyframes slideInRight {
+				from {
+					transform: translate(100%, -50%);  /* Start from right */
+					opacity: 0;
+				}
+				to {
+					transform: translate(0, -50%);  /* Move to center */
+					opacity: 1;
+				}
+			}
+
+			@keyframes floatBoy {
+				0%, 100% {
+					transform: translateY(0);
+				}
+				50% {
+					transform: translateY(-10px);
+				}
+			}
+
+			@keyframes slideInLeft {
+				to {
+					transform: translateX(-30px);
+				}
+			}
+
+			@keyframes float {
+				0%, 100% {
+					transform: translateX(-30px) translateY(0);
+				}
+				50% {
+					transform: translateX(-30px) translateY(-10px);
+				}
+			}
+
+
+			@keyframes slideInLeftFlask {
+				0% {
+					transform: translateX(-100%);
+					opacity: 0;
+				}
+				100% {
+					transform: translateX(0);
+					opacity: 1;
+				}
+			}
+
+			@keyframes floatFlask {
+				0%, 100% {
+					transform: translateY(0);
+				}
+				50% {
+					transform: translateY(-10px);
+				}
+			}
+
+			.welcome-text-content {
+				max-width: 100%;
+				padding: 1.25rem;
+				margin-bottom: 0rem;
+			}
+			
+			#welcome-title {
+				font-size: 1.25rem;
+			}
+
+			.favorite-history {
+				right: 0.5rem;
+				top: 12%;
+			}
+			
+			.buffer-ph-inputs {
+				gap: 0.75rem;
+			}
+	
+        }
+    </style>
+</head>
+
+<body class="welcome-page">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 18h8"/>
+                    <path d="M3 22h18"/>
+                    <path d="M14 22a7 7 0 1 0 0-14h-1"/>
+                    <path d="M9 14h2"/>
+                    <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/>
+                    <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>
+                </svg>
+                <span id="typewriter"></span>
+            </div>
+            <div class="nav-actions">
+                <button id="resetButton" class="icon-button" title="Reset Inputs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                </button>
+                <button id="darkModeToggle" class="icon-button" title="Toggle Theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dark-mode-icon">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <div class="search-wrapper">
+            <input type="text" id="calculatorSearch" class="search-input" placeholder="Search calculators...">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Welcome Page -->
+        <div id="welcomePage" class="page active">
+			<div class="calculator-content welcome-content">
+				<div class="welcome-header">
+					<div class="welcome-text-content">
+						<svg class="welcome-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M6 18h8"/>
+							<path d="M3 22h18"/>
+							<path d="M14 22a7 7 0 1 0 0-14h-1"/>
+							<path d="M9 14h2"/>
+							<path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/>
+							<path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>
+						</svg>
+						<div>
+							<div class="welcome-title">
+								<span id="welcome-title"></span>
+								<span class="title-cursor"></span>
+							</div>
+							<p class="welcome-description">Your comprehensive laboratory calculator suite</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Separate images container -->
+				<div class="welcome-images-container">
+					<div class="welcome-images">
+						<img src="images/3DFlask.png" alt="Flask" class="flask-image">
+						<img src="images/Boy.png" alt="Scientist" class="scientist-image">
+					</div>
+				</div>
+
+                <div class="welcome-features">
+                    <!-- Quick Start Section -->
+                    <div class="welcome-section">
+                        <h2 class="section-title">Quick Start</h2>
+                        <div class="quick-actions" id="quickActions">
+			
+                        </div>
+                    </div>
+
+                    <!-- Recent Calculations Section -->
+                    <div class="welcome-section">
+                        <h2 class="section-title">Recent Calculations</h2>
+                        <div id="welcomeHistory" class="welcome-history">
+                            <!-- Recent calculations will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Getting Started Guide -->
+                    <div class="welcome-section">
+                        <h2 class="section-title">Getting Started</h2>
+                        <div class="guide-steps">
+                            <div class="guide-step">
+								<div class="step-icon">
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+										<path d="M9 18h6"/>
+										<path d="M10 22h4"/>
+									</svg>
+								</div>
+                                <div class="step-content">
+                                    <h3>Choose Calculator</h3>
+                                    <p>Select from our specialized calculators designed for laboratory tasks</p>
+                                </div>
+                            </div>
+                            <div class="guide-step">
+                                <div class="step-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                        <path d="M12 8v8M8 12h8"/>
+                                    </svg>
+                                </div>
+                                <div class="step-content">
+                                    <h3>Enter Values</h3>
+                                    <p>Input your measurement values and parameters</p>
+                                </div>
+                            </div>
+                            <div class="guide-step">
+                                <div class="step-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <path d="M22 4L12 14.01l-3-3"/>
+                                    </svg>
+                                </div>
+                                <div class="step-content">
+                                    <h3>Get Results</h3>
+                                    <p>View detailed calculations and save them for future reference</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		
+		
+		<!-- Calculator View -->
+        <main class="main-content page" id="calculatorPage">
+            <!-- Calculator Menu -->
+            <div class="calculator-menu">
+                <div class="calculator-list" id="calculatorList">
+                    <!-- Log Reduction Calculator Card -->
+                    <button class="calculator-button active" data-calculator="logReduction">
+                        <svg class="calculator-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                        <div>
+                            <div class="calculator-title">Log Reduction</div>
+                            <div class="calculator-description">Calculate antimicrobial effectiveness</div>
+                        </div>
+                    </button>
+
+                    <!-- Dilution Calculator Card -->
+                    <button class="calculator-button" data-calculator="dilution">
+                        <svg class="calculator-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 19h14.56l-5.069-8.577a2 2 0 0 1-.211-.896V2"/>
+                            <path d="M8.5 2h7"/>
+                            <path d="M7 16h10"/>
+                        </svg>
+                        <div>
+                            <div class="calculator-title">Dilution Calculator</div>
+                            <div class="calculator-description">Calculate solution concentrations</div>
+                        </div>
+                    </button>
+
+                    <!-- CFU Calculator Card -->
+                    <button class="calculator-button" data-calculator="cfu">
+                        <svg class="calculator-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>
+                        </svg>
+                        <div>
+                            <div class="calculator-title">CFU Calculator</div>
+                            <div class="calculator-description">Colony counting and dilution factors</div>
+                        </div>
+                    </button>
+
+                    <!-- Media Calculator Card -->
+                    <button class="calculator-button" data-calculator="media">
+                        <svg class="calculator-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 3h6v11a6 6 0 0 1-3 5.197A6 6 0 0 1 9 14V3"/>
+                            <path d="M9 8h6"/>
+                        </svg>
+                        <div>
+                            <div class="calculator-title">Media Preparation</div>
+                            <div class="calculator-description">Calculate media components</div>
+                        </div>
+                    </button>
+					
+					
+					<!-- Ethanol Calculator Card -->
+					<button class="calculator-button" data-calculator="ethanol">
+						<svg class="calculator-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M9 3v1m0 0v8a3 3 0 1 0 6 0V4m0-1v1"/>
+							<path d="M12 12v3"/>
+							<path d="M10 19h4"/>
+							<rect x="8" y="4" width="8" height="2" rx="1"/>
+						</svg>
+						<div>
+							<div class="calculator-title">Ethanol Preparation</div>
+							<div class="calculator-description">Calculate ethanol dilutions</div>
+						</div>
+					</button>					
+					
+					
+					<button class="calculator-button" data-calculator="buffer">
+						<svg class="calculator-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+							<circle cx="12" cy="7" r="4"/>
+							<path d="M12 3v1m0 4v1m-4-3h1m6 0h1"/>
+						</svg>
+						<div>
+							<div class="calculator-title">Buffer Capacity</div>
+							<div class="calculator-description">Calculate buffer resistance to pH changes</div>
+						</div>
+					</button>					
+					
+
+					<button class="calculator-button" data-calculator="bufferPh">
+						<svg class="calculator-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M12 2v6M12 22v-6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M22 12h-6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/>
+						</svg>
+						<div>
+							<div class="calculator-title">Buffer pH</div>
+							<div class="calculator-description">Calculate buffer solution pH</div>
+						</div>
+					</button>				
+					
+					
+					
+					
+					
+                </div>
+            </div>
+
+            <!-- Calculator Content Area -->
+            <div class="calculator-content">
+                <!-- Log Reduction Calculator -->
+                <div id="logReduction" class="calculator-section">
+                    <div class="calculator-title">Log Reduction Calculator</div>
+                    <p class="calculator-description">Calculate the log reduction of microorganisms after treatment</p>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Initial Count (CFU/mL)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="initialCount" class="input" placeholder="Enter initial count">
+                            <span class="input-unit">CFU/mL</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Final Count (CFU/mL)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="finalCount" class="input" placeholder="Enter final count">
+                            <span class="input-unit">CFU/mL</span>
+                        </div>
+                    </div>
+                    
+                    <button class="calculate-button" onclick="calculateLogReduction()">Calculate</button>
+                    <div id="logReductionResult" class="result" style="display: none;"></div>
+                </div>
+
+                <!-- Dilution Calculator -->
+                <div id="dilution" class="calculator-section" style="display: none;">
+                    <div class="calculator-title">Dilution Calculator</div>
+                    <p class="calculator-description">Calculate volumes for solution preparation</p>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Stock Concentration (%)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="stockConc" class="input" placeholder="Enter stock concentration">
+                            <span class="input-unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Target Concentration (%)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="targetConc" class="input" placeholder="Enter target concentration">
+                            <span class="input-unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Final Volume (mL)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="finalVolume" class="input" placeholder="Enter final volume">
+                            <span class="input-unit">mL</span>
+                        </div>
+                    </div>
+                    
+                    <button class="calculate-button" onclick="calculateDilution()">Calculate</button>
+                    <div id="dilutionResult" class="result" style="display: none;"></div>
+                </div>
+
+                <!-- CFU Calculator -->
+                <div id="cfu" class="calculator-section" style="display: none;">
+                    <div class="calculator-title">CFU Calculator</div>
+                    <p class="calculator-description">Calculate Colony Forming Units with dilution factors</p>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Number of Colonies</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="colonies" class="input" placeholder="Enter colony count">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Dilution Factor</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="dilutionFactor" class="input" placeholder="e.g., 1000 for 10⁻³">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Plated Volume (mL)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="platedVolume" class="input" placeholder="Enter plated volume">
+                            <span class="input-unit">mL</span>
+                        </div>
+                    </div>
+                    
+                    <button class="calculate-button" onclick="calculateCFU()">Calculate</button>
+                    <div id="cfuResult" class="result" style="display: none;"></div>
+                </div>
+
+                <!-- Media Calculator -->
+                <div id="media" class="calculator-section" style="display: none;">
+                    <div class="calculator-title">Media Preparation</div>
+                    <p class="calculator-description">Calculate reagent quantities for media preparation</p>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Final Volume (L)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="mediaVolume" class="input" placeholder="Enter final volume">
+                            <span class="input-unit">L</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Concentration (mM)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="mediaConc" class="input" placeholder="Enter concentration">
+                            <span class="input-unit">mM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Molecular Weight (g/mol)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="molecularWeight" class="input" placeholder="Enter molecular weight">
+                            <span class="input-unit">g/mol</span>
+                        </div>
+                    </div>
+                    
+                    <button class="calculate-button" onclick="calculateMedia()">Calculate</button>
+                    <div id="mediaResult" class="result" style="display: none;"></div>
+                </div>
+								
+				
+				
+				<div id="ethanol" class="calculator-section" style="display: none;">
+					<div class="calculator-title">Ethanol Preparation</div>
+					<p class="calculator-description">Calculate volumes for ethanol dilution and preparation</p>
+					
+					<div class="input-group">
+						<label class="input-label">Desired Ethanol Concentration</label>
+						<div class="input-wrapper">
+							<input type="number" id="ethanolDesiredConc" class="input" placeholder="Enter desired concentration">
+							<span class="input-unit">%</span>
+						</div>
+					</div>
+
+					<div class="input-group">
+						<label class="input-label">Available Ethanol Concentration</label>
+						<div class="input-wrapper">
+							<input type="number" id="ethanolAvailableConc" class="input" placeholder="Enter available concentration">
+							<span class="input-unit">%</span>
+						</div>
+					</div>
+
+					<div class="input-group">
+						<label class="input-label">Available Ethanol Volume (optional)</label>
+						<div class="input-wrapper">
+							<input type="number" id="ethanolAvailableVol" class="input" placeholder="Enter available volume">
+							<span class="input-unit">mL</span>
+						</div>
+					</div>
+
+					<div class="input-group">
+						<label class="input-label">Desired Final Volume (optional)</label>
+						<div class="input-wrapper">
+							<input type="number" id="ethanolDesiredVol" class="input" placeholder="Enter final volume">
+							<span class="input-unit">mL</span>
+						</div>
+					</div>
+					
+					<button class="calculate-button" onclick="calculateEthanol()">Calculate</button>
+					<div id="ethanolResult" class="result" style="display: none;"></div>
+				</div>				
+				
+				
+				<div id="buffer" class="calculator-section" style="display: none;">
+					<div class="calculator-title">Buffer Capacity Calculator</div>
+					<p class="calculator-description">Calculate the capacity of a buffer solution to resist pH changes</p>
+					
+					<div class="input-group">
+						<label class="input-label">Amount of acid/base</label>
+						<div class="input-wrapper">
+							<input type="number" id="bufferAmount" class="input" placeholder="Enter amount">
+							<div class="input-unit has-select">
+								<span class="unit-label">mol/</span>
+								<select id="bufferUnit">
+									<option value="l">L</option>
+									<option value="mm3">mm³</option>
+									<option value="cm3">cm³</option>
+									<option value="m3">m³</option>
+									<option value="in3">cu in</option>
+									<option value="ft3">cu ft</option>
+									<option value="ml">mL</option>
+									<option value="gal_us">US gal</option>
+									<option value="gal_uk">UK gal</option>
+									<option value="fl_oz_us">US fl oz</option>
+									<option value="fl_oz_uk">UK fl oz</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					
+					<div class="input-group">
+						<label class="input-label">Initial pH</label>
+						<div class="input-wrapper">
+							<input type="number" id="initialPh" class="input" placeholder="Enter initial pH">
+							<span class="input-unit no-select">pH</span>
+						</div>
+					</div>
+					
+					<div class="input-group">
+						<label class="input-label">Final pH</label>
+						<div class="input-wrapper">
+							<input type="number" id="finalPh" class="input" placeholder="Enter final pH">
+							<span class="input-unit no-select">pH</span>
+						</div>
+					</div>
+					
+					<button class="calculate-button" onclick="calculateBuffer()">Calculate</button>
+					<div id="bufferResult" class="result" style="display: none;"></div>
+				</div>		
+				
+
+				<!-- Buffer pH Calculator -->
+				<div id="bufferPh" class="calculator-section" style="display: none;">
+					<div class="calculator-title">Buffer pH Calculator</div>
+					<p class="calculator-description">Calculate pH of buffer solutions using Henderson-Hasselbalch equation</p>
+					
+					<div class="buffer-ph-inputs">
+						<div class="input-group">
+							<label class="input-label">Buffer Type</label>
+							<div class="input-wrapper">
+								<div class="buffer-select-wrapper">
+									<select id="bufferType" class="buffer-select input">
+										<option value="acid">Acid</option>
+										<option value="base">Base</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="input-group">
+							<label class="input-label">Acid Dissociation Constant (Ka)</label>
+							<div class="input-wrapper">
+								<input type="number" id="ka" class="input" placeholder="Enter Ka value">
+							</div>
+						</div>
+
+						<div class="input-group">
+							<label class="input-label">pKa</label>
+							<div class="input-wrapper">
+								<input type="number" id="pka" class="input" placeholder="Enter pKa value">
+							</div>
+						</div>
+
+						<div class="input-group">
+							<label class="input-label">Acid Concentration</label>
+							<div class="input-wrapper">
+								<input type="number" id="acidConc" class="input" placeholder="Enter acid concentration">
+								<div class="input-unit has-select">
+									<select id="acidUnit">
+										<option value="M">M</option>
+										<option value="mM">mM</option>
+										<option value="µM">µM</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="input-group">
+							<label class="input-label">Salt/Base Concentration</label>
+							<div class="input-wrapper">
+								<input type="number" id="saltConc" class="input" placeholder="Enter salt concentration">
+								<div class="input-unit has-select">
+									<select id="saltUnit">
+										<option value="M">M</option>
+										<option value="mM">mM</option>
+										<option value="µM">µM</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<button class="calculate-button" onclick="calculateBufferPh()">Calculate</button>
+					<div id="bufferPhResult" class="result" style="display: none;"></div>
+				</div>
+				
+				
+				
+				
+				
+				
+            </div>
+        </main>
+
+
+        <!-- History View -->
+        <div id="historyPage" class="page">
+            <div class="calculator-content">
+                <div class="history-header">
+                    <svg class="history-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                    </svg>
+                    <div>
+                        <div class="history-title">
+                            <span id="history-title"></span>
+                        </div>
+                        <p class="history-description">Track and restore your recent calculations</p>
+                    </div>
+                </div>
+                <div id="historyList"></div>
+            </div>
+        </div>
+
+        <!-- About View -->
+        <div id="aboutPage" class="page">
+            <div class="calculator-content">
+                <div class="about-header">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 18h8"/>
+                        <path d="M3 22h18"/>
+                        <path d="M14 22a7 7 0 1 0 0-14h-1"/>
+                        <path d="M9 14h2"/>
+                        <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/>
+                        <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>
+                    </svg>
+                    <span id="about-title"></span>
+                </div>
+                <p class="calculator-description">
+                    Your comprehensive calculator suite for microbiological calculations.
+                    Version 1.0.0
+                </p>
+                
+                <div class="about-features">
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                        <div class="feature-title">Accurate Calculations</div>
+                        <div class="feature-description">
+                            Precise log reduction and dilution calculations for reliable results
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>
+                        </svg>
+                        <div class="feature-title">CFU Analysis</div>
+                        <div class="feature-description">
+                            Advanced colony counting and dilution factor calculations
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 3v7m0 4v7M3 12h7m4 0h7"/>
+                        </svg>
+                        <div class="feature-title">Media Preparation</div>
+                        <div class="feature-description">
+                            Precise media component calculations for perfect preparations
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                        </svg>
+                        <div class="feature-title">Calculation History</div>
+                        <div class="feature-description">
+                            Save and restore your previous calculations
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Toggle Button -->
+    <button class="nav-toggle" aria-label="Toggle navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+        </svg>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav visible">
+        <button class="bottom-nav-item active" data-page="welcome">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <path d="M9 22V12h6v10"/>
+            </svg>
+            <span>Home</span>
+
+		</button>
+        <button class="bottom-nav-item" data-page="calculator">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                <path d="M7 8h10M7 12h10M7 16h10"/>
+            </svg>
+            <span>Calculator</span>
+        </button>
+        <button class="bottom-nav-item" data-page="history">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+            </svg>
+            <span>History</span>
+        </button>
+        <button class="bottom-nav-item" data-page="about">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4m0-4h.01"/>
+            </svg>
+            <span>About</span>
+        </button>
+    </nav>
+
+    <script>
+	
+	
+		// Add this before your existing initialization code
+		class Typewriter {
+			constructor(element, messages, options = {}) {
+				if (!element) return;
+				
+				// Remove any existing cursors before creating new one
+				const existingCursor = element.parentNode.querySelector('.typewriter-cursor');
+				if (existingCursor) {
+					existingCursor.remove();
+				}
+				
+				this.element = element;
+				this.messages = messages;
+				this.currentMessageIndex = 0;
+				this.currentText = '';
+				this.letterIndex = 0;
+				this.typingSpeed = options.typingSpeed || 100;
+				this.deletingSpeed = options.deletingSpeed || 50;
+				this.pauseDuration = options.pauseDuration || 2000;
+				this.isDeleting = false;
+				this.cursor = document.createElement('span');
+				this.cursor.className = 'typewriter-cursor';
+				this.element.parentNode.insertBefore(this.cursor, this.element.nextSibling);
+				this.timeoutId = null;
+			}
+
+			type() {
+				if (this.timeoutId) {
+					clearTimeout(this.timeoutId);
+				}
+
+				const currentMessage = this.messages[this.currentMessageIndex];
+				
+				if (this.isDeleting) {
+					this.currentText = currentMessage.substring(0, this.letterIndex - 1);
+					this.letterIndex--;
+				} else {
+					this.currentText = currentMessage.substring(0, this.letterIndex + 1);
+					this.letterIndex++;
+				}
+
+				this.element.textContent = this.currentText;
+
+				let typeSpeed = this.isDeleting ? this.deletingSpeed : this.typingSpeed;
+
+				if (!this.isDeleting && this.letterIndex === currentMessage.length) {
+					typeSpeed = this.pauseDuration;
+					this.isDeleting = true;
+				} else if (this.isDeleting && this.letterIndex === 0) {
+					this.isDeleting = false;
+					this.currentMessageIndex++;
+					if (this.currentMessageIndex === this.messages.length) {
+						this.currentMessageIndex = 0;
+					}
+				}
+
+				this.timeoutId = setTimeout(() => this.type(), typeSpeed);
+			}
+
+			stop() {
+				if (this.timeoutId) {
+					clearTimeout(this.timeoutId);
+				}
+				if (this.cursor && this.cursor.parentNode) {
+					this.cursor.remove();
+				}
+			}
+		}
+
+	
+	
+	
+	
+        // Initialize variables
+		let currentCalculator = 'logReduction';
+		let darkMode = localStorage.getItem('darkMode') === 'false';
+		// Update the initialization near the top of the script
+		let calculationHistory = JSON.parse(localStorage.getItem('calculationHistory') || '[]')
+			.map(entry => ({...entry, favorite: entry.favorite || false}));
+		let currentIndex = 0;
+
+		let currentSort = 'date';
+
+		let recentCalculators = JSON.parse(localStorage.getItem('recentCalculators') || '[]');
+		const MAX_RECENT_CALCULATORS = 4;
+
+		// Add this right after the variables defined above
+		function getTypeStyles(type) {
+		  const styles = {
+			'Log Reduction': {
+			  gradient: 'var(--log-reduction)',
+			  icon: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'
+			},
+			'Dilution': {
+			  gradient: 'var(--dilution)', 
+			  icon: '<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 19h14.56l-5.069-8.577a2 2 0 0 1-.211-.896V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>'
+			},
+			'CFU': {
+			  gradient: 'var(--cfu)',
+			  icon: '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>'
+			},
+			'Media': {
+			  gradient: 'var(--media)',
+			  icon: '<path d="M9 3h6v11a6 6 0 0 1-3 5.197A6 6 0 0 1 9 14V3"/><path d="M9 8h6"/>'
+			},
+			'Ethanol': {
+			  gradient: 'var(--ethanol)',
+			  icon: '<path d="M9 3v1m0 0v8a3 3 0 1 0 6 0V4m0-1v1"/><path d="M12 12v3"/><path d="M10 19h4"/><rect x="8" y="4" width="8" height="2" rx="1"/>'
+			},
+			'Buffer Capacity': {
+			  gradient: 'var(--buffer)', 
+			  icon: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 3v1m0 4v1m-4-3h1m6 0h1"/>'
+			},
+			'Buffer pH': {
+				gradient: 'var(--buffer-ph)',
+				icon: '<path d="M12 2v6M12 22v-6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M22 12h-6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/>'
+			}		
+		  };
+		  return styles[type] || styles['Log Reduction'];
+		}
+
+		// Initialize app when DOM is loaded
+		document.addEventListener('DOMContentLoaded', () => {
+			updateDeleteButtonStyle();
+			initializeApp();
+		});
+
+
+		document.addEventListener('DOMContentLoaded', function() {
+			const buttons = document.querySelectorAll('.calculate-button');
+			buttons.forEach(button => {
+				const text = button.textContent;
+				button.innerHTML = `
+					<svg viewBox="0 0 24 24">
+						<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+						<path d="M20 3v4"/>
+						<path d="M22 5h-4"/>
+						<path d="M4 17v2"/><path d="M5 18H3"/>
+					</svg>
+					Calculate
+				`;
+			});
+		});
+
+		function initializeBufferCalculator() {
+			const kaInput = document.getElementById('ka');
+			const pkaInput = document.getElementById('pka');
+			
+			if (kaInput && pkaInput) {
+				// Ka input handler
+				kaInput.addEventListener('input', function() {
+					const ka = parseFloat(this.value);
+					if (ka > 0) {
+						pkaInput.disabled = true;
+						pkaInput.value = (-Math.log10(ka)).toFixed(4);
+					} else {
+						pkaInput.disabled = false;
+						pkaInput.value = '';
+					}
+				});
+
+				// pKa input handler
+				pkaInput.addEventListener('input', function() {
+					const pka = parseFloat(this.value);
+					if (!isNaN(pka)) {
+						kaInput.disabled = true;
+						kaInput.value = Math.pow(10, -pka).toExponential(4);
+					} else {
+						kaInput.disabled = false;
+						kaInput.value = '';
+					}
+				});
+			}
+		}
+
+
+		function createRipple(event) {
+			const button = event.currentTarget;
+			const ripple = document.createElement('span');
+			const rect = button.getBoundingClientRect();
+			
+			const diameter = Math.max(rect.width, rect.height);
+			const radius = diameter / 2;
+			
+			ripple.style.width = ripple.style.height = `${diameter}px`;
+			ripple.style.left = `${event.clientX - rect.left - radius}px`;
+			ripple.style.top = `${event.clientY - rect.top - radius}px`;
+			ripple.classList.add('ripple');
+			
+			const existingRipple = button.querySelector('.ripple');
+			if (existingRipple) {
+				existingRipple.remove();
+			}
+			
+			button.appendChild(ripple);
+			
+			ripple.addEventListener('animationend', () => {
+				ripple.remove();
+			});
+		}
+
+		function createTitleElements(titleId) {
+			const titleElement = document.getElementById(titleId);
+			if (!titleElement) return null;
+
+			// Create container
+			const container = document.createElement('div');
+			container.className = 'title-container';
+
+			// Create shadow element
+			const shadow = document.createElement('div');
+			shadow.className = 'title-shadow';
+
+			// Create cursor element
+			const cursor = document.createElement('span');
+			cursor.className = 'title-cursor';
+
+			// Move the title element into the container
+			titleElement.parentNode.insertBefore(container, titleElement);
+			container.appendChild(titleElement);
+			container.appendChild(cursor);
+			container.appendChild(shadow);
+
+			return { container, titleElement, cursor, shadow };
+		}
+
+
+
+
+
+
+
+		// Initialize welcome page elements
+		function initializeWelcomePage() {
+			initializeWelcomeTitle();
+			updateWelcomeHistory();
+		}
+
+		// Initialize welcome title with typewriter effect
+		function initializeWelcomeTitle() {
+			const titleControl = initializeTitle('welcome-title', 'Welcome to MyLAB');
+			if (!titleControl) return;
+
+			// Clear any existing content
+			const titleElement = document.getElementById('welcome-title');
+			if (titleElement) {
+				titleElement.textContent = '';
+				titleElement.style.opacity = '1'; // Ensure visibility
+				titleElement.style.position = 'relative'; // Ensure proper positioning
+				titleElement.style.display = 'inline-block'; // Ensure proper display
+			}
+
+			const observer = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (mutation.target.classList.contains('active')) {
+						titleControl.reset();
+						titleControl.type();
+					}
+				});
+			});
+			
+			observer.observe(document.getElementById('welcomePage'), {
+				attributes: true,
+				attributeFilter: ['class']
+			});
+
+			// Start typing immediately if page is already active
+			if (document.getElementById('welcomePage').classList.contains('active')) {
+				titleControl.reset();
+				titleControl.type();
+			}
+		}
+
+		// Update welcome page history section
+		function updateWelcomeHistory() {
+			const welcomeHistory = document.getElementById('welcomeHistory');
+			if (!welcomeHistory) return;
+
+			if (calculationHistory.length === 0) {
+				welcomeHistory.innerHTML = `
+					<div class="history-empty">
+						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; opacity: 0.5;">
+							<path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+						</svg>
+						<p>No calculations yet</p>
+						<p style="font-size: 0.9em;">Start calculating to see your history</p>
+					</div>
+				`;
+				return;
+			}
+
+			// Only show the last 4 calculations
+			const recentHistory = calculationHistory.slice(0, 4);
+			welcomeHistory.innerHTML = recentHistory.map(entry => {
+				const typeStyle = getTypeStyles(entry.type);
+				return `
+					<div class="history-entry">
+						<div class="result" data-id="${entry.id}" 
+							 onclick="restoreCalculation(${entry.id})" 
+							 style="background: ${typeStyle.gradient}; border: none; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+							<div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+									${typeStyle.icon}
+								</svg>
+								<div class="result-title" style="color: white; margin: 0;">${entry.type}</div>
+							</div>
+							<div class="result-value" style="color: white;">${formatValue(entry.result)}</div>
+						</div>
+					</div>
+				`;
+			}).join('');
+		}
+
+		// Function to switch directly to a specific calculator
+		function switchToCalculator(calculatorId) {
+			switchPage('calculator');
+			
+			// Find the index of the calculator button
+			const buttons = document.querySelectorAll('.calculator-button');
+			const buttonIndex = Array.from(buttons).findIndex(btn => 
+				btn.getAttribute('data-calculator') === calculatorId
+			);
+			
+			if (buttonIndex !== -1) {
+				currentIndex = buttonIndex;
+				updateCardPositions(currentIndex);
+				switchCalculator(calculatorId);
+			}
+		}
+
+
+
+
+
+
+
+
+
+		const titleWriters = new Map(); // Store typewriter instances
+
+		function initializeTitle(titleId, text) {
+			const titleElement = document.getElementById(titleId);
+			if (!titleElement) return;
+
+			// Clear any existing typewriter
+			if (titleWriters.has(titleId)) {
+				titleWriters.get(titleId).stop();
+				titleWriters.delete(titleId);
+			}
+
+			let index = 0;
+			titleElement.textContent = ''; // Clear initial content
+			
+			// Create wrapper div if it doesn't exist
+			let wrapper = titleElement.parentElement;
+			if (!wrapper.classList.contains('title-wrapper')) {
+				wrapper = document.createElement('div');
+				wrapper.style.position = 'relative';
+				wrapper.classList.add('title-wrapper');
+				titleElement.parentNode.insertBefore(wrapper, titleElement);
+				wrapper.appendChild(titleElement);
+			}
+			
+			// Create or update cursor
+			let cursor = wrapper.querySelector('.title-cursor');
+			if (cursor) cursor.remove();
+			cursor = document.createElement('span');
+			cursor.className = 'title-cursor';
+			wrapper.appendChild(cursor);
+			
+			// Create or update shadow
+			let shadow = wrapper.querySelector('.title-shadow');
+			if (shadow) shadow.remove();
+			shadow = document.createElement('div');
+			shadow.className = 'title-shadow';
+			wrapper.appendChild(shadow);
+			
+			function type() {
+				if (index < text.length) {
+					titleElement.textContent = text.slice(0, index + 1);
+					index++;
+					requestAnimationFrame(() => {
+						shadow.style.width = `${titleElement.offsetWidth}px`;
+					});
+					setTimeout(type, 100);
+				}
+			}
+			
+			const writer = {
+				type,
+				reset: () => {
+					index = 0;
+					titleElement.textContent = '';
+					shadow.style.width = '0';
+					type();
+				},
+				stop: () => {
+					if (cursor) cursor.remove();
+					if (shadow) shadow.style.width = '0';
+				}
+			};
+
+			titleWriters.set(titleId, writer);
+			return writer;
+		}
+
+		function initializeAboutTitle() {
+			const titleControl = initializeTitle('about-title', 'MyLAB');
+			if (!titleControl) return;
+
+			const observer = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (mutation.target.classList.contains('active')) {
+						titleControl.reset();
+						titleControl.type();
+					}
+				});
+			});
+			
+			observer.observe(document.getElementById('aboutPage'), {
+				attributes: true,
+				attributeFilter: ['class']
+			});
+		}
+
+
+		function initializeHistoryTitle() {
+			const titleControl = initializeTitle('history-title', 'Calculation History');
+			if (!titleControl) return;
+
+			const observer = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (mutation.target.classList.contains('active')) {
+						titleControl.reset();
+						titleControl.type();
+					}
+				});
+			});
+			
+			observer.observe(document.getElementById('historyPage'), {
+				attributes: true,
+				attributeFilter: ['class']
+			});
+		}
+
+		function getDefaultCalculators() {
+			return [
+				{
+					id: 'logReduction',
+					title: 'Log Reduction',
+					icon: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+					gradient: 'var(--log-reduction)'
+				},
+				{
+					id: 'dilution',
+					title: 'Dilution',
+					icon: '<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 19h14.56l-5.069-8.577a2 2 0 0 1-.211-.896V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
+					gradient: 'var(--dilution)'
+				},
+				{
+					id: 'cfu',
+					title: 'CFU',
+					icon: '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>',
+					gradient: 'var(--cfu)'
+				},
+				{
+					id: 'media',
+					title: 'Media',
+					icon: '<path d="M9 3h6v11a6 6 0 0 1-3 5.197A6 6 0 0 1 9 14V3"/><path d="M9 8h6"/>',
+					gradient: 'var(--media)'
+				}
+			];
+		}
+
+		function updateQuickActionCards() {
+			const quickActions = document.getElementById('quickActions');
+			if (!quickActions) return;
+
+			let calculatorsToShow = [...recentCalculators];
+			const defaultCalcs = getDefaultCalculators();
+
+			// Add this check to prevent infinite loop
+			if (calculatorsToShow.length >= MAX_RECENT_CALCULATORS) {
+				calculatorsToShow = calculatorsToShow.slice(0, MAX_RECENT_CALCULATORS);
+			} else {
+				// Fill remaining slots with default calculators
+				for (let i = 0; i < defaultCalcs.length && calculatorsToShow.length < MAX_RECENT_CALCULATORS; i++) {
+					const nextDefault = defaultCalcs[i];
+					if (!calculatorsToShow.find(calc => calc.id === nextDefault.id)) {
+						calculatorsToShow.push(nextDefault);
+					}
+				}
+			}
+
+			quickActions.innerHTML = calculatorsToShow.map(calc => `
+				<button class="quick-action-card" 
+						onclick="switchToCalculator('${calc.id}')" 
+						style="--card-gradient: ${calc.gradient || `var(--${calc.id})`}">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						${calc.icon}
+					</svg>
+					<span>${calc.title}</span>
+				</button>
+			`).join('');
+		}
+
+		function trackCalculatorUsage(calculator) {
+			console.log('Tracking calculator usage:', calculator.id);
+			
+			// Remove if this calculator already exists
+			recentCalculators = recentCalculators.filter(calc => calc.id !== calculator.id);
+			console.log('Filtered existing entry');
+			
+			// Add to beginning
+			recentCalculators.unshift({
+				...calculator,
+				lastUsed: Date.now()
+			});
+			console.log('Added new usage');
+			
+			// Keep only the most recent
+			recentCalculators = recentCalculators.slice(0, MAX_RECENT_CALCULATORS);
+			console.log('Trimmed recent list');
+			
+			// Save to localStorage
+			localStorage.setItem('recentCalculators', JSON.stringify(recentCalculators));
+			console.log('Saved to localStorage');
+			
+			// Update the display
+			updateQuickActionCards();
+			console.log('Updated quick action cards');
+		}
+
+
+
+		let isNavVisible = true; // Changed to true for initial visibility
+		let lastScrollY = 0;
+		let scrollTimeout = null;
+
+		function initializeNavToggle() {
+			const navToggle = document.querySelector('.nav-toggle');
+			const bottomNav = document.querySelector('.bottom-nav');
+			const container = document.querySelector('.container');
+			
+			// Show navigation by default
+			bottomNav.classList.remove('hidden');
+			bottomNav.classList.add('visible');
+			navToggle.classList.add('active');
+			navToggle.classList.remove('hidden');
+			
+			// Toggle navigation on button click
+			navToggle.addEventListener('click', () => {
+				isNavVisible = !isNavVisible;
+				navToggle.classList.toggle('active', isNavVisible);
+				navToggle.classList.toggle('hidden', !isNavVisible);
+				bottomNav.classList.toggle('hidden', !isNavVisible);
+				bottomNav.classList.toggle('visible', isNavVisible);
+				
+				// Update container padding when nav is toggled
+				if (isNavVisible) {
+					container.style.paddingBottom = `${parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--footer-height'))}px`;
+				} else {
+					container.style.paddingBottom = '0';
+				}
+			});
+			
+			// Handle scroll behavior
+			let lastScrollY = container.scrollTop;
+			let scrollTimeout = null;
+			
+			container.addEventListener('scroll', () => {
+				if (scrollTimeout) {
+					clearTimeout(scrollTimeout);
+				}
+				
+				scrollTimeout = setTimeout(() => {
+					const currentScroll = container.scrollTop;
+					
+					// Only hide nav when scrolling down AND nav is currently visible
+					// Remove auto-show on scroll up
+					if (currentScroll > lastScrollY && currentScroll > 100 && isNavVisible) {
+						isNavVisible = false;
+						navToggle.classList.remove('active');
+						navToggle.classList.add('hidden');
+						bottomNav.classList.remove('visible');
+						bottomNav.classList.add('hidden');
+						container.style.paddingBottom = '0';
+					}
+					
+					lastScrollY = currentScroll;
+				}, 150);
+			});
+		}
+
+		let mainTypewriter = null;
+
+		function initializeApp() {
+			if (darkMode) {
+				document.body.classList.add('dark');
+			}
+			
+			const typewriterElement = document.getElementById('typewriter');
+			const messages = [
+				"Hi, Scientist!",
+				"Discover MyLAB!",
+				"A Science Hub!",
+				"Let's Explore!",
+				"Examine!",
+				"Measure!",
+				"Evaluate!",
+				"Scrutinize!",
+				"Elucidate!",
+				"And, Analyze!"
+			];
+			
+			// Clean up existing typewriter
+			if (mainTypewriter) {
+				mainTypewriter.stop();
+			}
+			
+			mainTypewriter = new Typewriter(typewriterElement, messages, {
+				typingSpeed: 100,
+				deletingSpeed: 50,
+				pauseDuration: 2000
+			});
+			
+			mainTypewriter.type();
+			
+			initializeNavToggle();
+			initializeWelcomePage();
+			initializeAboutTitle();
+			initializeHistoryTitle();
+			
+			setupEventListeners();
+			setupCardStack();
+			updateCardPositions(0);
+			//updateHistoryDisplay();
+			
+			updateQuickActionCards();
+			
+			initializeBufferCalculator();
+			
+			// Add this line
+			recentCalculators = JSON.parse(localStorage.getItem('recentCalculators') || '[]');
+			
+			currentSort = 'date';
+			updateHistoryDisplay('date');
+			
+			// Initialize ethanol inputs if starting on ethanol calculator
+			if (currentCalculator === 'ethanol') {
+				setupEthanolInputs();
+			}			
+			
+		}
+
+		// Enhanced setupPageSwipe function
+		function setupPageSwipe() {
+			const container = document.querySelector('.container');
+			let touchStartX = 0;
+			let touchEndX = 0;
+			let touchStartY = 0;
+			const pages = ['welcome', 'calculator', 'history', 'about']; // Updated pages array
+			let isVerticalScroll = false;
+			let initialPage = null;
+
+			container.addEventListener('touchstart', (e) => {
+				// Ignore if touch started inside calculator menu
+				if (e.target.closest('.calculator-menu')) return;
+
+				touchStartX = e.touches[0].clientX;
+				touchStartY = e.touches[0].pageY;
+				isVerticalScroll = false;
+				
+				// Store the initial page
+				initialPage = document.querySelector('.page.active')?.id?.replace('Page', '') || 'calculator';
+			});
+
+			container.addEventListener('touchmove', (e) => {
+				if (e.target.closest('.calculator-menu')) return;
+				if (isVerticalScroll) return;
+
+				const touchMoveX = e.touches[0].clientX;
+				const touchMoveY = e.touches[0].pageY;
+				const diffX = Math.abs(touchMoveX - touchStartX);
+				const diffY = Math.abs(touchMoveY - touchStartY);
+
+				if (diffY > diffX && diffY > 10) {
+					isVerticalScroll = true;
+					return;
+				}
+
+				// Prevent default only for horizontal swipes
+				if (diffX > diffY && diffX > 10) {
+					e.preventDefault();
+				}
+			}, { passive: false });
+
+			container.addEventListener('touchend', (e) => {
+				if (e.target.closest('.calculator-menu')) return;
+				if (isVerticalScroll) return;
+
+				touchEndX = e.changedTouches[0].clientX;
+				const swipeDistance = touchEndX - touchStartX;
+				const threshold = 100;
+
+				if (Math.abs(swipeDistance) < threshold) return;
+
+				const currentIndex = pages.indexOf(initialPage);
+				let newIndex;
+
+				if (swipeDistance > 0) {
+					// Swipe right - previous page
+					newIndex = (currentIndex - 1 + pages.length) % pages.length;
+				} else {
+					// Swipe left - next page
+					newIndex = (currentIndex + 1) % pages.length;
+				}
+
+				const newPage = pages[newIndex];
+				
+				// Use the same transition as click navigation
+				switchPage(newPage, true); // Added isSwipe parameter
+				updateBottomNav(newPage);
+			});
+		}
+
+		function convertBufferUnits(value, fromUnit, toUnit) {
+			// Convert everything to liters first
+			const toL = {
+				'l': v => v,
+				'mm3': v => v * 0.000001,
+				'cm3': v => v * 0.001,
+				'm3': v => v * 1000,
+				'in3': v => v * 0.0163871,
+				'ft3': v => v * 28.3168,
+				'ml': v => v * 0.001,
+				'gal_us': v => v * 3.78541,
+				'gal_uk': v => v * 4.54609,
+				'fl_oz_us': v => v * 0.0295735,
+				'fl_oz_uk': v => v * 0.0284131
+			};
+
+			const fromL = {
+				'l': v => v,
+				'mm3': v => v * 1000000,
+				'cm3': v => v * 1000,
+				'm3': v => v * 0.001,
+				'in3': v => v * 61.0237,
+				'ft3': v => v * 0.0353147,
+				'ml': v => v * 1000,
+				'gal_us': v => v * 0.264172,
+				'gal_uk': v => v * 0.219969,
+				'fl_oz_us': v => v * 33.814,
+				'fl_oz_uk': v => v * 35.1951
+			};
+
+			const liters = toL[fromUnit](value);
+			return fromL[toUnit](liters);
+		}
+
+		function setupEventListeners() {
+			// Dark mode toggle
+			document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+			
+			// Reset button
+			document.getElementById('resetButton').addEventListener('click', handleReset);
+			
+			// Calculator buttons
+			document.querySelectorAll('.calculator-button').forEach((button, index) => {
+				button.addEventListener('click', () => {
+					const calculatorId = button.getAttribute('data-calculator');
+					currentIndex = index;
+					updateCardPositions(currentIndex);
+					switchCalculator(calculatorId);
+				});
+			});
+
+			// Add page swipe functionality
+			setupPageSwipe();
+			
+			// Bottom navigation
+			document.querySelectorAll('.bottom-nav-item').forEach(item => {
+				item.addEventListener('click', () => {
+					const page = item.getAttribute('data-page');
+					switchPage(page);
+					updateBottomNav(page);
+				});
+			});
+			
+			// Add ripple effect
+			document.querySelectorAll('.bottom-nav-item').forEach(button => {
+				button.addEventListener('click', createRipple);
+			});
+
+			// Search functionality
+			const searchInput = document.getElementById('calculatorSearch');
+			if (searchInput) {
+				searchInput.addEventListener('input', handleSearch);
+			}
+
+			// Setup ethanol inputs
+			setupEthanolInputs();
+			
+			
+			const bufferUnitSelect = document.getElementById('bufferUnit');
+			const bufferAmount = document.getElementById('bufferAmount');
+			
+			if (bufferUnitSelect && bufferAmount) {
+				bufferUnitSelect.addEventListener('change', (e) => {
+					const newUnit = e.target.value;
+					const currentValue = parseFloat(bufferAmount.value);
+					
+					if (!isNaN(currentValue)) {
+						const oldUnit = bufferUnitSelect.dataset.lastUnit || 'l';
+						const convertedValue = convertBufferUnits(currentValue, oldUnit, newUnit);
+						bufferAmount.value = convertedValue.toFixed(4);
+						bufferUnitSelect.dataset.lastUnit = newUnit;
+					}
+					
+				});
+			}
+			
+			
+			// Add buffer pH unit conversion handlers
+			const acidUnitSelect = document.getElementById('acidUnit');
+			const saltUnitSelect = document.getElementById('saltUnit');
+			
+			if (acidUnitSelect) {
+				acidUnitSelect.addEventListener('change', function() {
+					const acidInput = document.getElementById('acidConc');
+					const currentValue = parseFloat(acidInput.value);
+					if (!isNaN(currentValue)) {
+						const oldUnit = this.dataset.lastUnit || 'M';
+						const newUnit = this.value;
+						const convertedValue = convertConcentration(currentValue, oldUnit, newUnit);
+						acidInput.value = convertedValue.toFixed(4);
+						this.dataset.lastUnit = newUnit;
+					}
+				});
+			}
+
+			if (saltUnitSelect) {
+				saltUnitSelect.addEventListener('change', function() {
+					const saltInput = document.getElementById('saltConc');
+					const currentValue = parseFloat(saltInput.value);
+					if (!isNaN(currentValue)) {
+						const oldUnit = this.dataset.lastUnit || 'M';
+						const newUnit = this.value;
+						const convertedValue = convertConcentration(currentValue, oldUnit, newUnit);
+						saltInput.value = convertedValue.toFixed(4);
+						this.dataset.lastUnit = newUnit;
+					}
+				});
+			}
+			
+			
+			// Initialize Ka/pKa interaction
+			const kaInput = document.getElementById('ka');
+			const pkaInput = document.getElementById('pka');
+			
+			if (kaInput && pkaInput) {
+				kaInput.addEventListener('input', function() {
+					const ka = parseFloat(this.value);
+					if (ka > 0) {
+						pkaInput.disabled = true;
+						pkaInput.value = (-Math.log10(ka)).toFixed(4);
+					} else {
+						pkaInput.disabled = false;
+						pkaInput.value = '';
+					}
+				});
+
+				pkaInput.addEventListener('input', function() {
+					const pka = parseFloat(this.value);
+					if (!isNaN(pka)) {
+						kaInput.disabled = true;
+						kaInput.value = Math.pow(10, -pka).toExponential(4);
+					} else {
+						kaInput.disabled = false;
+						kaInput.value = '';
+					}
+				});
+			}			
+			
+			
+			
+			
+			
+			
+			
+		}
+			
+			
+			
+			
+			
+			
+			
+
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark', darkMode);
+            localStorage.setItem('darkMode', darkMode);
+            
+            const icon = document.querySelector('.dark-mode-icon');
+            icon.style.transform = 'rotate(360deg)';
+            
+            setTimeout(() => {
+                icon.innerHTML = darkMode ? 
+                    '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>' :
+                    '<circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+                icon.style.transform = '';
+            }, 300);
+        }
+
+        function handleReset() {
+            const icon = document.querySelector('#resetButton svg');
+            icon.style.transform = 'rotate(360deg)';
+            
+            setTimeout(() => {
+                resetInputs();
+                icon.style.transform = '';
+            }, 300);
+        }
+
+		function handleSearch(e) {
+			const searchTerm = e.target.value.toLowerCase();
+			const buttons = document.querySelectorAll('.calculator-button');
+			let firstMatchIndex = -1;
+			
+			// Reset all calculator sections to hidden first
+			document.querySelectorAll('.calculator-section').forEach(section => {
+				section.style.display = 'none';
+				section.style.opacity = '0';
+				section.style.transform = 'translateY(10px) scale(0.98)';
+			});
+			
+			// First, remove all positioning classes
+			buttons.forEach(button => {
+				button.classList.remove('active', 'next', 'prev');
+				button.style.display = 'none'; // Hide all buttons initially
+			});
+			
+			// Find all matching buttons and show them
+			let matchingButtons = Array.from(buttons).filter((button, index) => {
+				const title = button.querySelector('.calculator-title').textContent.toLowerCase();
+				const description = button.querySelector('.calculator-description').textContent.toLowerCase();
+				const matches = title.includes(searchTerm) || description.includes(searchTerm);
+				
+				if (matches && searchTerm !== '') {
+					button.style.display = 'flex'; // Show matching buttons
+					if (firstMatchIndex === -1) firstMatchIndex = index;
+					return true;
+				}
+				return false;
+			});
+			
+			// If no search term, show all buttons
+			if (searchTerm === '') {
+				buttons.forEach(button => button.style.display = 'flex');
+				matchingButtons = Array.from(buttons);
+				firstMatchIndex = currentIndex;
+			}
+			
+			// If we have matches, update the display
+			if (matchingButtons.length > 0) {
+				const activeIndex = firstMatchIndex;
+				currentIndex = activeIndex;
+				
+				// Update positions for matching buttons
+				matchingButtons.forEach((button, i) => {
+					if (i === 0) {
+						button.classList.add('active');
+						const calculatorId = button.getAttribute('data-calculator');
+						switchCalculator(calculatorId);
+					} else if (i === 1) {
+						button.classList.add('next');
+					} else if (i === matchingButtons.length - 1 && i !== 0) {
+						button.classList.add('prev');
+					}
+				});
+			} else if (searchTerm === '') {
+				// If search is cleared, restore normal view
+				updateCardPositions(currentIndex);
+				const currentButton = buttons[currentIndex];
+				if (currentButton) {
+					const calculatorId = currentButton.getAttribute('data-calculator');
+					switchCalculator(calculatorId);
+				}
+			}
+		}
+
+
+		// Modify setupCardStack() for better mobile handling
+		function setupCardStack() {
+			const buttons = document.querySelectorAll('.calculator-button');
+			let startX = 0;
+			let currentX = 0;
+			let isMoving = false;
+			let initialTouch = null;
+			
+			const menu = document.querySelector('.calculator-menu');
+			if (!menu) return;
+
+			// Update initial positions
+			updateCardPositions(currentIndex);
+
+			function handleTouchStart(e) {
+				if (!e.touches[0]) return;
+				startX = e.touches[0].clientX;
+				currentX = startX;
+				isMoving = false;
+				initialTouch = {
+					x: e.touches[0].clientX,
+					y: e.touches[0].pageY
+				};
+			}
+
+			function handleTouchMove(e) {
+				if (!initialTouch || !e.touches[0]) return;
+				
+				const touch = e.touches[0];
+				const deltaX = Math.abs(touch.clientX - initialTouch.x);
+				const deltaY = Math.abs(touch.pageY - initialTouch.y);
+
+				// If vertical scrolling is detected, let the browser handle it
+				if (deltaY > deltaX) {
+					isMoving = false;
+					return;
+				}
+
+				// If horizontal movement is significant, prevent default
+				if (deltaX > 10) {
+					e.preventDefault();
+					isMoving = true;
+					currentX = touch.clientX;
+				}
+			}
+
+			function handleTouchEnd(e) {
+				if (!initialTouch) return;
+				
+				const touch = e.changedTouches[0];
+				const deltaX = touch.clientX - startX;
+				
+				if (!isMoving) {
+					// Handle tap
+					const button = e.target.closest('.calculator-button');
+					if (button) {
+						const calculatorId = button.getAttribute('data-calculator');
+						const index = Array.from(buttons).indexOf(button);
+						currentIndex = index;
+						updateCardPositions(index);
+						switchCalculator(calculatorId);
+					}
+				} else if (Math.abs(deltaX) > 50) {
+					// Handle swipe
+					if (deltaX > 0) {
+						cycleCards('prev');
+					} else {
+						cycleCards('next');
+					}
+				}
+				
+				initialTouch = null;
+				isMoving = false;
+			}
+
+			// Clean up existing listeners
+			menu.removeEventListener('touchstart', handleTouchStart);
+			menu.removeEventListener('touchmove', handleTouchMove);
+			menu.removeEventListener('touchend', handleTouchEnd);
+
+			// Add new listeners
+			menu.addEventListener('touchstart', handleTouchStart, { passive: true });
+			menu.addEventListener('touchmove', handleTouchMove, { passive: false });
+			menu.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+			// Optional: Add mouse wheel event for desktop
+			menu.addEventListener('wheel', (e) => {
+				e.preventDefault();
+				if (e.deltaY > 0) {
+					cycleCards('next');
+				} else {
+					cycleCards('prev');
+				}
+			}, { passive: false });
+		}
+
+		// Enhanced cycleCards function
+		function cycleCards(direction) {
+			const buttons = document.querySelectorAll('.calculator-button');
+			const totalCards = buttons.length;
+
+			buttons.forEach(btn => {
+				btn.classList.remove('active', 'prev', 'next');
+			});
+
+			if (direction === 'next') {
+				currentIndex = (currentIndex + 1) % totalCards;
+			} else {
+				currentIndex = (currentIndex - 1 + totalCards) % totalCards;
+			}
+
+			updateCardPositions(currentIndex);
+
+			// Update calculator with animation
+			const newActiveButton = buttons[currentIndex];
+			const calculatorId = newActiveButton.getAttribute('data-calculator');
+			
+			// Add a small delay to ensure smooth transition
+			setTimeout(() => {
+				switchCalculator(calculatorId);
+			}, 50);
+		}
+
+        function updateCardPositions(activeIndex) {
+            const buttons = document.querySelectorAll('.calculator-button');
+            const totalCards = buttons.length;
+
+            buttons.forEach((button, index) => {
+                button.classList.remove('active', 'prev', 'next');
+                
+                if (index === activeIndex) {
+                    button.classList.add('active');
+                } else if (index === (activeIndex + 1) % totalCards) {
+                    button.classList.add('next');
+                } else if (index === (activeIndex - 1 + totalCards) % totalCards) {
+                    button.classList.add('prev');
+                }
+            });
+        }
+
+		// First add this function before switchCalculator
+		function setupEthanolInputs() {
+			const availableVolInput = document.getElementById('ethanolAvailableVol');
+			const desiredVolInput = document.getElementById('ethanolDesiredVol');
+			
+			if (!availableVolInput || !desiredVolInput) return;
+			
+			function updateInputState(activeInput, inactiveInput) {
+				if (activeInput.value.trim() !== '') {
+					inactiveInput.disabled = true;
+					inactiveInput.value = '';
+					inactiveInput.parentElement.style.opacity = '0.5';
+				} else {
+					inactiveInput.disabled = false;
+					inactiveInput.parentElement.style.opacity = '1';
+				}
+			}
+			
+			availableVolInput.addEventListener('input', () => {
+				updateInputState(availableVolInput, desiredVolInput);
+			});
+			
+			desiredVolInput.addEventListener('input', () => {
+				updateInputState(desiredVolInput, availableVolInput);
+			});
+		}
+
+		// Then modify switchCalculator like this
+		function switchCalculator(calculatorId) {
+			const sections = document.querySelectorAll('.calculator-section');
+			currentCalculator = calculatorId;
+			
+			sections.forEach(section => {
+				if (section.id === calculatorId) {
+					// First set display to block
+					section.style.display = 'block';
+					
+					// Force a reflow to ensure the transition works
+					section.offsetHeight;
+					
+					// Then trigger the animation in the next frame
+					requestAnimationFrame(() => {
+						section.style.opacity = '1';
+						section.style.transform = 'translateY(0) scale(1)';
+						
+						// Initialize ethanol inputs if switching to ethanol calculator
+						if (calculatorId === 'ethanol') {
+							setupEthanolInputs();
+						}
+					});
+				} else {
+					// Start fade out
+					section.style.opacity = '0';
+					section.style.transform = 'translateY(10px) scale(0.98)';
+					
+					// Hide after transition
+					setTimeout(() => {
+						if (section.style.opacity === '0') {
+							section.style.display = 'none';
+						}
+					}, 200);
+				}
+			});
+
+			// Clear previous results
+			sections.forEach(section => {
+				const resultDiv = section.querySelector('.result');
+				if (resultDiv) {
+					resultDiv.style.opacity = '0';
+					setTimeout(() => {
+						resultDiv.style.display = 'none';
+					}, 200);
+				}
+			});
+
+			// Reset non-active calculator inputs
+			sections.forEach(section => {
+				if (section.id !== calculatorId) {
+					const inputs = section.querySelectorAll('input');
+					inputs.forEach(input => {
+						input.value = '';
+						input.disabled = false;
+						if (input.parentElement) {
+							input.parentElement.style.opacity = '1';
+						}
+					});
+				}
+			});
+		}
+
+        // Calculation Functions with Step-by-Step Display
+        function calculateLogReduction() {
+			animateCalculateButton('logReduction');
+			console.log('Starting dilution calculation...'); // Add this line
+            const initial = parseFloat(document.getElementById('initialCount').value);
+            const final = parseFloat(document.getElementById('finalCount').value);
+            
+            if (initial && final && initial > final) {
+                const reduction = Math.log10(initial / final);
+                const percentage = (1 - (final / initial)) * 100;
+                
+                // Create steps HTML
+                const stepsHtml = `
+                    <div class="calculation-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Input Values</div>
+                                <p>Initial Count (N₀) = ${initial.toLocaleString()} CFU/mL</p>
+                                <p>Final Count (N) = ${final.toLocaleString()} CFU/mL</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Calculate Ratio</div>
+                                <div class="step-formula">N₀/N = ${initial.toLocaleString()} / ${final.toLocaleString()} = ${(initial/final).toFixed(4)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Calculate Log₁₀</div>
+                                <div class="step-formula">Log₁₀(${(initial/final).toFixed(4)}) = ${reduction.toFixed(4)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <div class="step-title">Percentage Reduction</div>
+                                <div class="step-formula">(1 - ${final.toLocaleString()}/${initial.toLocaleString()}) × 100 = ${percentage.toFixed(2)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result">
+                        <div class="result-title">Final Results</div>
+                        <div class="result-value">${reduction.toFixed(2)} log₁₀ reduction</div>
+                        <div class="result-note">
+                            This represents a ${percentage.toFixed(2)}% reduction in microbial count
+                        </div>
+                    </div>
+                `;
+                
+                displayResult('logReduction', stepsHtml);
+                addToHistory('Log Reduction', `${reduction.toFixed(2)} log₁₀`, { initialCount: initial, finalCount: final });
+            	
+				// Add this line at the end:
+				trackCalculatorUsage({
+					id: 'logReduction',
+					title: 'Log Reduction',
+					icon: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+					gradient: 'var(--log-reduction)'
+				});							
+			}
+        }
+
+        function calculateDilution() {
+			animateCalculateButton('dilution'); // Add this line at the start
+			console.log('Starting dilution calculation...'); // Add this line
+            const stockConc = parseFloat(document.getElementById('stockConc').value);
+            const targetConc = parseFloat(document.getElementById('targetConc').value);
+            const finalVolume = parseFloat(document.getElementById('finalVolume').value);
+            
+            if (stockConc && targetConc && finalVolume && targetConc < stockConc) {
+                const stockVolume = (targetConc * finalVolume) / stockConc;
+                const diluentVolume = finalVolume - stockVolume;
+                
+                const stepsHtml = `
+                    <div class="calculation-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Input Values</div>
+                                <p>Stock Concentration (C₁) = ${stockConc}%</p>
+                                <p>Target Concentration (C₂) = ${targetConc}%</p>
+                                <p>Final Volume (V₂) = ${finalVolume} mL</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Calculate Stock Volume using C₁V₁ = C₂V₂</div>
+                                <div class="step-formula">
+                                    V₁ = (C₂ × V₂) / C₁<br>
+                                    V₁ = (${targetConc} × ${finalVolume}) / ${stockConc}<br>
+                                    V₁ = ${stockVolume.toFixed(2)} mL
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Calculate Diluent Volume</div>
+                                <div class="step-formula">
+                                    Diluent = Final Volume - Stock Volume<br>
+                                    Diluent = ${finalVolume} - ${stockVolume.toFixed(2)}<br>
+                                    Diluent = ${diluentVolume.toFixed(2)} mL
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result">
+                        <div class="result-title">Final Results</div>
+                        <div class="result-value">Stock solution needed: ${stockVolume.toFixed(2)} mL</div>
+                        <div class="result-note">
+                            Add ${diluentVolume.toFixed(2)} mL of diluent.<br>
+                            To achieve ${targetConc}% final concentration
+                        </div>
+                    </div>
+                `;
+                
+                displayResult('dilution', stepsHtml);
+                addToHistory('Dilution', `${stockVolume.toFixed(2)} mL stock needed`, 
+                    { stockConc, targetConc, finalVolume });
+					
+				trackCalculatorUsage({
+					id: 'dilution',
+					title: 'Dilution',
+					icon: '<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 19h14.56l-5.069-8.577a2 2 0 0 1-.211-.896V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
+					gradient: 'var(--dilution)'
+				});	
+            }
+        }
+
+		function calculateCFU() {
+			animateCalculateButton('cfu');
+			console.log('Starting dilution calculation...'); // Add this line
+			const colonies = parseFloat(document.getElementById('colonies').value);
+			const dilutionFactor = parseFloat(document.getElementById('dilutionFactor').value);
+			const platedVolume = parseFloat(document.getElementById('platedVolume').value);
+			
+			if (colonies && dilutionFactor && platedVolume) {
+				const cfu = (colonies * dilutionFactor) / platedVolume;
+				
+				// Format the CFU value with superscript
+				const formattedCFU = formatScientificNotation(cfu);
+				
+				const stepsHtml = `
+					<div class="calculation-steps">
+						<div class="step">
+							<div class="step-number">1</div>
+							<div class="step-content">
+								<div class="step-title">Input Values</div>
+								<p>Colony Count = ${colonies}</p>
+								<p>Dilution Factor = ${dilutionFactor}</p>
+								<p>Plated Volume = ${platedVolume} mL</p>
+							</div>
+						</div>
+						
+						<div class="step">
+							<div class="step-number">2</div>
+							<div class="step-content">
+								<div class="step-title">Calculate CFU/mL</div>
+								<div class="step-formula">
+									CFU/mL = (Colony Count × Dilution Factor) / Plated Volume<br>
+									CFU/mL = (${colonies} × ${dilutionFactor}) / ${platedVolume}<br>
+									CFU/mL = ${formattedCFU}
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="result">
+						<div class="result-title">Final Results</div>
+						<div class="result-value">${formattedCFU}</div>
+						<div class="result-note">
+							Based on ${colonies} colonies at ${dilutionFactor}× dilution.<br>
+							Plated volume: ${platedVolume} mL
+						</div>
+					</div>
+				`;
+				
+				displayResult('cfu', stepsHtml);
+				addToHistory('CFU', formattedCFU, 
+					{ colonies, dilutionFactor, platedVolume });
+					
+				trackCalculatorUsage({
+					id: 'cfu',
+					title: 'CFU',
+					icon: '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>',
+					gradient: 'var(--cfu)'
+				});
+			}
+		}
+
+
+
+
+		function convertConcentration(value, fromUnit, toUnit) {
+			// First convert to M
+			let inMolar = value;
+			if (fromUnit === 'mM') inMolar *= 0.001;
+			if (fromUnit === 'µM') inMolar *= 0.000001;
+			
+			// Then convert to target unit
+			if (toUnit === 'mM') return inMolar * 1000;
+			if (toUnit === 'µM') return inMolar * 1000000;
+			return inMolar;
+		}
+
+
+		// Add helper function for unit conversion
+		function convertToMolar(value, unit) {
+			switch(unit) {
+				case 'mM':
+					return value * 0.001;
+				case 'µM':
+					return value * 0.000001;
+				default:
+					return value;
+			}
+		}
+
+		// Helper function to format scientific notation
+		function formatScientificNotation(num) {
+			const exp = Math.floor(Math.log10(num));
+			const base = (num / Math.pow(10, exp)).toFixed(2);
+			return `${base}×10<sup>${exp}</sup> CFU/mL`;
+		}
+
+
+		function animateCalculateButton(calculatorId) {
+			const button = document.querySelector(`#${calculatorId} .calculate-button`);
+			if (!button) return;
+
+			button.classList.add('spinning');
+			
+			// Remove the class after animation completes
+			setTimeout(() => {
+				button.classList.remove('spinning');
+			}, 300); // Match this with your CSS transition duration
+		}
+
+
+        function calculateMedia() {
+			animateCalculateButton('media'); // Add this line at the start
+			console.log('Starting dilution calculation...'); // Add this line
+			
+			const volume = parseFloat(document.getElementById('mediaVolume').value);
+			console.log('Got volume:', volume);
+			
+			const concentration = parseFloat(document.getElementById('mediaConc').value);
+			console.log('Got concentration:', concentration);
+			
+			const molecularWeight = parseFloat(document.getElementById('molecularWeight').value);
+            console.log('Got molecular weight:', molecularWeight);
+			
+			if (volume && concentration && molecularWeight) {
+				console.log('All inputs valid, calculating...');
+				const molarConcentration = concentration / 1000; // Convert mM to M
+				const mass = (concentration * volume * molecularWeight) / 1000;
+				console.log('Calculated mass:', mass);
+				
+				// Before generating HTML
+				console.log('Generating steps HTML...');
+                
+                const stepsHtml = `
+                    <div class="calculation-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Input Values</div>
+                                <p>Final Volume = ${volume} L</p>
+                                <p>Concentration = ${concentration} mM</p>
+                                <p>Molecular Weight = ${molecularWeight} g/mol</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Convert mM to M</div>
+                                <div class="step-formula">
+                                    ${concentration} mM = ${molarConcentration} M
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Calculate Mass</div>
+                                <div class="step-formula">
+                                    Mass = Concentration (M) × Volume (L) × Molecular Weight (g/mol)<br>
+                                    Mass = ${molarConcentration} × ${volume} × ${molecularWeight}<br>
+                                    Mass = ${mass.toFixed(3)} g
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result">
+                        <div class="result-title">Final Results</div>
+                        <div class="result-value">${mass.toFixed(3)} g required</div>
+                        <div class="result-note">
+                            Dissolve in ${volume} L of solvent.<br>
+                            To achieve ${concentration} mM concentration
+                        </div>
+                    </div>
+                `;
+				
+                console.log('About to display result...');
+				displayResult('media', stepsHtml);
+				console.log('Result displayed');
+				
+				addToHistory('Media', `${mass.toFixed(3)} g required`, {
+					volume,
+					concentration,
+					molecularWeight
+				});
+				
+				trackCalculatorUsage({
+					id: 'media',
+					title: 'Media',
+					icon: '<path d="M9 3h6v11a6 6 0 0 1-3 5.197A6 6 0 0 1 9 14V3"/><path d="M9 8h6"/>',
+					gradient: 'var(--media)'
+				});
+				
+			}
+		}
+
+
+
+		function calculateEthanol() {
+			animateCalculateButton('ethanol');
+			console.log('Starting dilution calculation...'); // Add this line
+			// Get input values
+			const desiredConc = parseFloat(document.getElementById('ethanolDesiredConc').value);
+			const availableConc = parseFloat(document.getElementById('ethanolAvailableConc').value);
+			const availableVol = parseFloat(document.getElementById('ethanolAvailableVol').value);
+			const desiredVol = parseFloat(document.getElementById('ethanolDesiredVol').value);
+			
+			// Basic validation
+			if (!desiredConc || !availableConc) {
+				return; // Exit if required fields are empty
+			}
+			
+			if (desiredConc >= availableConc) {
+				alert('Desired concentration must be less than available concentration');
+				return;
+			}
+			
+			let stockVolume, finalVolume, diluentVolume;
+			
+			// Calculate based on which volume is provided
+			if (!isNaN(availableVol) && availableVol > 0) {
+				// Calculate based on available volume
+				stockVolume = availableVol;
+				finalVolume = (stockVolume * availableConc) / desiredConc;
+				diluentVolume = finalVolume - stockVolume;
+			} else if (!isNaN(desiredVol) && desiredVol > 0) {
+				// Calculate based on desired final volume
+				finalVolume = desiredVol;
+				stockVolume = (desiredConc * finalVolume) / availableConc;
+				diluentVolume = finalVolume - stockVolume;
+			} else {
+				// Default calculation for 100mL final volume if no volumes specified
+				finalVolume = 100;
+				stockVolume = (desiredConc * finalVolume) / availableConc;
+				diluentVolume = finalVolume - stockVolume;
+			}
+			
+			const stepsHtml = `
+				<div class="calculation-steps">
+					<div class="step">
+						<div class="step-number">1</div>
+						<div class="step-content">
+							<div class="step-title">Input Values</div>
+							<p>Desired Concentration = ${desiredConc}%</p>
+							<p>Available Concentration = ${availableConc}%</p>
+							${!isNaN(availableVol) && availableVol > 0 ? `<p>Available Volume = ${availableVol} mL</p>` : ''}
+							${!isNaN(desiredVol) && desiredVol > 0 ? `<p>Desired Final Volume = ${desiredVol} mL</p>` : ''}
+						</div>
+					</div>
+					
+					<div class="step">
+						<div class="step-number">2</div>
+						<div class="step-content">
+							<div class="step-title">Calculate Volumes</div>
+							<div class="step-formula">
+								C₁V₁ = C₂V₂<br>
+								${availableConc}% × ${stockVolume.toFixed(2)}mL = ${desiredConc}% × ${finalVolume.toFixed(2)}mL
+							</div>
+						</div>
+					</div>
+					
+					<div class="step">
+						<div class="step-number">3</div>
+						<div class="step-content">
+							<div class="step-title">Calculate Water Volume</div>
+							<div class="step-formula">
+								Water Volume = Final Volume - Stock Volume<br>
+								${finalVolume.toFixed(2)}mL - ${stockVolume.toFixed(2)}mL = ${diluentVolume.toFixed(2)}mL
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="result">
+					<div class="result-title">Final Results</div>
+					<div class="result-value">${stockVolume.toFixed(2)} mL of ${availableConc}% ethanol needed</div>
+					<div class="result-note">
+						Add ${diluentVolume.toFixed(2)} mL of water<br>
+						Final volume: ${finalVolume.toFixed(2)} mL at ${desiredConc}% concentration
+					</div>
+				</div>
+			`;
+			
+			displayResult('ethanol', stepsHtml);
+			
+			// Modified history entry
+			addToHistory('Ethanol', `${stockVolume.toFixed(2)} mL stock needed`, {
+				ethanolDesiredConc: desiredConc,           // Match input IDs
+				ethanolAvailableConc: availableConc,       // Match input IDs
+				ethanolAvailableVol: availableVol || '',   // Match input IDs
+				ethanolDesiredVol: desiredVol || ''        // Match input IDs
+			});
+			
+			trackCalculatorUsage({
+				id: 'ethanol',
+				title: 'Ethanol',
+				icon: '<path d="M9 3v1m0 0v8a3 3 0 1 0 6 0V4m0-1v1"/><path d="M12 12v3"/><path d="M10 19h4"/><rect x="8" y="4" width="8" height="2" rx="1"/>',
+				gradient: 'var(--ethanol)'
+			});
+		}
+		
+		// Helper function to format numbers in scientific notation
+		function formatScientificValue(value, unit = '') {
+			if (value === 0) return `0 ${unit}`;
+			
+			// Convert to scientific notation
+			const exp = Math.floor(Math.log10(Math.abs(value)));
+			const base = value / Math.pow(10, exp);
+			
+			// Remove trailing zeros after decimal point
+			let formattedBase = base.toFixed(4).replace(/\.?0+$/, '');
+			if (!formattedBase.includes('.')) {
+				formattedBase += '.0';
+			}
+			
+			// Format unit with proper superscripts
+			const formattedUnit = formatSIUnit(unit);
+			
+			// Format with multiplication symbol and superscript
+			return `${formattedBase}×10<sup>${exp}</sup> ${formattedUnit}`.trim();
+		}
+
+
+		
+		function formatSIUnit(unit) {
+			// Replace specific unit patterns with proper superscripts
+			return unit
+				.replace(/mol\/M3\/pH/i, 'mol/M<sup>3</sup>/pH')
+				.replace(/mol\/M3/i, 'mol/M<sup>3</sup>')
+				.replace(/CFU\/mL/i, 'CFU/mL')
+				.replace(/mol\/mm3/i, 'mol/mm<sup>3</sup>')
+				.replace(/mol\/cm3/i, 'mol/cm<sup>3</sup>')
+				.replace(/mol\/m3/i, 'mol/m<sup>3</sup>')
+				.replace(/mol\/in3/i, 'mol/in<sup>3</sup>')
+				.replace(/mol\/ft3/i, 'mol/ft<sup>3</sup>')
+				.replace(/mol\/ml/i, 'mol/mL')
+				.replace(/M3/i, 'M<sup>3</sup>');
+		}	
+		
+		
+
+		function calculateBuffer() {
+			animateCalculateButton('buffer');
+			console.log('Starting dilution calculation...'); // Add this line
+			const amount = parseFloat(document.getElementById('bufferAmount').value);
+			const initialPh = parseFloat(document.getElementById('initialPh').value);
+			const finalPh = parseFloat(document.getElementById('finalPh').value);
+			const unit = document.getElementById('bufferUnit').value;
+			const unitLabel = `mol/${unit.toUpperCase()}`;
+			
+			if (amount && initialPh && finalPh) {
+				const deltaPh = Math.abs(finalPh - initialPh);
+				const bufferCapacity = amount / deltaPh;
+				
+				const stepsHtml = `
+					<div class="calculation-steps">
+						<div class="step">
+							<div class="step-number">1</div>
+							<div class="step-content">
+								<div class="step-title">Input Values</div>
+								<p>Amount of acid/base: ${formatScientificValue(amount, unitLabel)}</p>
+								<p>Initial pH: ${formatValue(initialPh)}</p>
+								<p>Final pH: ${formatValue(finalPh)}</p>
+							</div>
+						</div>
+						
+						<div class="step">
+							<div class="step-number">2</div>
+							<div class="step-content">
+								<div class="step-title">Calculate pH Change (ΔpH)</div>
+								<div class="step-formula">
+									ΔpH = |Final pH - Initial pH|<br>
+									ΔpH = |${finalPh} - ${initialPh}| = ${parseFloat(deltaPh.toFixed(4))}
+								</div>
+							</div>
+						</div>
+						
+						<div class="step">
+							<div class="step-number">3</div>
+							<div class="step-content">
+								<div class="step-title">Calculate Buffer Capacity (β)</div>
+								<div class="step-formula">
+									β = n / ΔpH<br>
+									β = ${formatScientificValue(amount)} / ${parseFloat(deltaPh.toFixed(4))} = ${formatScientificValue(bufferCapacity, `${unitLabel}/pH`)}
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="result">
+						<div class="result-title">Buffer Capacity</div>
+						<div class="result-value">${formatScientificValue(bufferCapacity, `${unitLabel}/pH`)}</div>
+						<div class="result-note">
+							This buffer can neutralize ${formatScientificValue(amount, unitLabel)} of acid/base<br>
+							with a pH change of ${parseFloat(deltaPh.toFixed(4))} units
+						</div>
+					</div>
+				`;
+				
+				displayResult('buffer', stepsHtml);
+				addToHistory('Buffer Capacity', formatScientificValue(bufferCapacity, `${unitLabel}/pH`), {
+					bufferAmount: amount,
+					initialPh,
+					finalPh,
+					unit
+				});
+
+				trackCalculatorUsage({
+					id: 'buffer',
+					title: 'Buffer Capacity',  // Change here
+					icon: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 3v1m0 4v1m-4-3h1m6 0h1"/>',
+					gradient: 'var(--buffer)'
+				});
+			}
+		}
+
+
+		// Add Buffer pH Calculator function
+		function calculateBufferPh() {
+			animateCalculateButton('bufferPh');
+			console.log('Starting dilution calculation...'); // Add this line
+			const bufferType = document.getElementById('bufferType').value;
+			const ka = parseFloat(document.getElementById('ka').value);
+			const acidConc = convertToMolar(
+				parseFloat(document.getElementById('acidConc').value),
+				document.getElementById('acidUnit').value
+			);
+			const saltConc = convertToMolar(
+				parseFloat(document.getElementById('saltConc').value),
+				document.getElementById('saltUnit').value
+			);
+
+			if (ka && acidConc && saltConc) {
+				const pka = -Math.log10(ka);
+				let ph;
+				
+				if (bufferType === 'acid') {
+					ph = pka + Math.log10(saltConc / acidConc);
+				} else {
+					ph = 14 - (-Math.log10(ka)) - Math.log10(saltConc / acidConc);
+				}
+
+				const stepsHtml = `
+					<div class="calculation-steps">
+						<div class="step">
+							<div class="step-number">1</div>
+							<div class="step-content">
+								<div class="step-title">Input Values</div>
+								<p>Buffer Type: ${bufferType.charAt(0).toUpperCase() + bufferType.slice(1)}</p>
+								<p>Ka = ${formatScientificValue(ka)}</p>
+								<p>pKa = ${pka.toFixed(4)}</p>
+								<p>[HA] = ${formatScientificValue(acidConc, 'M')}</p>
+								<p>[A⁻] = ${formatScientificValue(saltConc, 'M')}</p>
+							</div>
+						</div>
+						
+						<div class="step">
+							<div class="step-number">2</div>
+							<div class="step-content">
+								<div class="step-title">Calculate pH using Henderson-Hasselbalch</div>
+								<div class="step-formula">
+									pH = pKa + log([A⁻]/[HA])<br>
+									pH = ${pka.toFixed(4)} + log(${formatScientificValue(saltConc, 'M')}/${formatScientificValue(acidConc, 'M')})<br>
+									pH = ${ph.toFixed(4)}
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="result">
+						<div class="result-title">Buffer pH</div>
+						<div class="result-value">${ph.toFixed(4)}</div>
+						<div class="result-note">
+							Buffer capacity is optimal when pH is within ±1 of pKa<br>
+							(${(pka - 1).toFixed(2)} to ${(pka + 1).toFixed(2)})
+						</div>
+					</div>
+				`;
+				
+				displayResult('bufferPh', stepsHtml);
+				addToHistory('Buffer pH', `pH ${ph.toFixed(4)}`, {
+					bufferType,
+					ka,
+					acidConc,
+					saltConc,
+					acidUnit: document.getElementById('acidUnit').value,
+					saltUnit: document.getElementById('saltUnit').value
+				});
+
+				trackCalculatorUsage({
+					id: 'bufferPh',
+					title: 'Buffer pH',
+					icon: '<path d="M12 2v6M12 22v-6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M22 12h-6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/>',
+					gradient: 'var(--buffer-ph)'
+				});
+			}
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		function displayResult(calculatorId, html) {
+			const resultDiv = document.getElementById(`${calculatorId}Result`);
+			if (!resultDiv) return;
+			
+			const formattedHtml = html.replace(/(\d{6,})/g, (match) => {
+				return match.replace(/(\d{3})/g, '$1,');
+			});
+			
+			resultDiv.innerHTML = formattedHtml;
+			resultDiv.style.display = 'block';
+			resultDiv.style.opacity = '0';
+			
+			requestAnimationFrame(() => {
+				resultDiv.style.opacity = '1';
+				resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			});
+		}
+
+		function addToHistory(type, result, inputs) {
+			console.log('Adding to history:', type);
+			
+			const standardizedInputs = type === 'Media' ? {
+				mediaVolume: inputs.volume,
+				mediaConc: inputs.concentration,
+				molecularWeight: inputs.molecularWeight
+			} : inputs;
+			
+			console.log('Standardized inputs:', standardizedInputs);
+			
+			const entry = {
+				id: Date.now(),
+				type,
+				result,
+				inputs: standardizedInputs,
+				timestamp: new Date().toLocaleString(),
+				favorite: false
+			};
+			
+			console.log('Created history entry:', entry);
+			
+			calculationHistory.unshift(entry);
+			console.log('Added to history array');
+			
+			
+			// Remove old non-favorite entries if exceeding limit
+			const nonFavorites = calculationHistory.filter(entry => !entry.favorite);
+			if (nonFavorites.length > 15) {
+				// Find the oldest non-favorite entry to remove
+				const oldestNonFavoriteIndex = calculationHistory.findIndex(
+					entry => !entry.favorite && 
+					entry.id === nonFavorites[nonFavorites.length - 1].id
+				);
+				if (oldestNonFavoriteIndex !== -1) {
+					calculationHistory.splice(oldestNonFavoriteIndex, 1);
+				}
+			}
+			
+			localStorage.setItem('calculationHistory', JSON.stringify(calculationHistory));
+			console.log('Saved to localStorage');
+			
+			updateHistoryDisplay();
+			console.log('Updated history display');
+			
+			updateWelcomeHistory();
+			console.log('Updated welcome history');
+		}
+
+
+		// Replace the existing updateHistoryDisplay function
+		function updateHistoryDisplay(newSort) {
+			const historyList = document.getElementById('historyList');
+			if (!historyList) return;
+
+			// Update sort state if provided
+			const oldSort = currentSort;
+			if (newSort !== undefined) {
+				currentSort = newSort;
+			}
+
+			const buttonText = currentSort === 'favorite' ? 'Show All' : 'Show Favorites';
+			const sortControls = `
+				<div class="history-sort-controls">
+					<button class="sort-button ${currentSort === 'favorite' ? 'active' : ''}" 
+							onclick="updateHistoryDisplay(currentSort === 'favorite' ? 'date' : 'favorite')">
+						<svg viewBox="0 0 24 24" fill="${currentSort === 'favorite' ? 'currentColor' : 'none'}" 
+							 stroke="currentColor" stroke-width="2">
+							<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+						</svg>
+						<span class="button-text-container">
+							<span class="button-text ${oldSort !== currentSort ? 'out' : 'in'}">${buttonText}</span>
+						</span>
+					</button>
+				</div>
+			`;
+
+			// Get current entries before updating
+			const oldEntries = Array.from(historyList.querySelectorAll('.history-entry'));
+			
+			// Animate out current entries
+			oldEntries.forEach(entry => {
+				entry.classList.add('fade-out');
+			});
+
+			// Wait for fade out
+			setTimeout(() => {
+				// Update content
+				if (calculationHistory.length === 0) {
+					historyList.innerHTML = `
+						${sortControls}
+						<div class="history-empty fade-in">
+							<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; opacity: 0.5;">
+								<path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+							</svg>
+							<p>No calculations yet</p>
+							<p style="font-size: 0.9em;">Your calculation history will appear here</p>
+						</div>
+					`;
+					return;
+				}
+
+				const sortedHistory = sortHistory();
+				
+				if (sortedHistory.length === 0 && currentSort === 'favorite') {
+					historyList.innerHTML = `
+						${sortControls}
+						<div class="history-empty fade-in">
+							<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; opacity: 0.5;">
+								<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+							</svg>
+							<p>No favorite calculations</p>
+							<p style="font-size: 0.9em;">Add favorites to see them here</p>
+						</div>
+					`;
+					return;
+				}
+
+				historyList.innerHTML = `
+					${sortControls}
+					${sortedHistory.map((entry, index) => {
+						const typeStyle = getTypeStyles(entry.type);
+						return `
+							<div class="history-entry fade-in" style="animation-delay: ${index * 50}ms">
+								<div class="result" data-id="${entry.id}" 
+									 onclick="restoreCalculation(${entry.id})" 
+									 style="background: ${typeStyle.gradient}; border: none; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+									<button class="favorite-history ${entry.favorite ? 'active' : ''}" 
+											onclick="toggleFavorite(${entry.id}, event)" 
+											aria-label="Toggle favorite">
+										<svg viewBox="0 0 24 24" fill="${entry.favorite ? 'currentColor' : 'none'}" stroke="currentColor">
+											<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+										</svg>
+									</button>
+									<button class="delete-history" onclick="deleteHistoryEntry(${entry.id}, event)" aria-label="Delete entry">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+											<path d="M18 6L6 18M6 6l12 12"/>
+										</svg>
+									</button>
+									<div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+										<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+											${typeStyle.icon}
+										</svg>
+										<div class="result-title" style="color: white; margin: 0;">${entry.type} • ${entry.timestamp}</div>
+									</div>
+									<div class="result-value" style="color: white;">${formatValue(entry.result)}</div>
+									<div class="result-note" style="color: rgba(255, 255, 255, 0.9);">${formatInputs(entry.inputs)}</div>
+								</div>
+							</div>
+						`;
+					}).join('')}
+				`;
+
+				// Trigger button text animation
+				setTimeout(() => {
+					const buttonText = historyList.querySelector('.button-text');
+					if (buttonText) {
+						buttonText.classList.remove('out');
+						buttonText.classList.add('in');
+					}
+				}, 50);
+			}, 300); // Match the fade-out duration
+		}
+
+
+		// Update the deleteHistoryEntry styling for better visibility on colored backgrounds
+		function updateDeleteButtonStyle() {
+			const style = document.createElement('style');
+			style.textContent = `
+				.delete-history {
+					background: rgba(255, 255, 255, 0.2);
+					color: white;
+					border: 1px solid rgba(255, 255, 255, 0.3);
+				}
+				
+				.delete-history:hover {
+					background: rgba(255, 255, 255, 0.3);
+				}
+			`;
+			document.head.appendChild(style);
+		}
+
+
+		// Add these functions after the deleteHistoryEntry function
+		function toggleFavorite(id, event) {
+			event.stopPropagation();
+			
+			calculationHistory = calculationHistory.map(entry => {
+				if (entry.id === id) {
+					return {...entry, favorite: !entry.favorite};
+				}
+				return entry;
+			});
+			
+			localStorage.setItem('calculationHistory', JSON.stringify(calculationHistory));
+			updateHistoryDisplay(currentSort); // Maintain current sort state
+		}
+
+		function sortHistory() {
+			// First, separate favorites and non-favorites
+			const favorites = calculationHistory.filter(entry => entry.favorite);
+			const nonFavorites = calculationHistory.filter(entry => !entry.favorite);
+			
+			// Sort both arrays by date (newest first)
+			favorites.sort((a, b) => b.id - a.id);
+			nonFavorites.sort((a, b) => b.id - a.id);
+			
+			// Limit non-favorites to 15 entries
+			const limitedNonFavorites = nonFavorites.slice(0, 15);
+			
+			// If showing favorites, return only favorites, otherwise return combined list
+			if (currentSort === 'favorite') {
+				return favorites;
+			} else {
+				// Combine favorites and non-favorites, keeping favorites at the top
+				return [...favorites, ...limitedNonFavorites];
+			}
+		}
+
+
+
+
+		// ADD these new helper functions:
+		function formatValue(value) {
+			if (typeof value === 'string') {
+				// If already formatted with HTML tags, return as is
+				if (value.includes('<sup>')) {
+					return value;
+				}
+				
+				// Handle e+ notation
+				if (value.includes('e+')) {
+					const [num, exp] = value.split('e+');
+					const baseNum = parseFloat(parseFloat(num).toFixed(4))
+						.toString()
+						.replace(/\.?0+$/, '');
+					return `${baseNum}×10<sup>${exp}</sup>`;
+				}
+				
+				// Handle explicit scientific notation
+				if (value.includes('×10^')) {
+					const [base, exp] = value.split('×10^');
+					const baseFormatted = parseFloat(parseFloat(base).toFixed(4))
+						.toString()
+						.replace(/\.?0+$/, '');
+					return `${baseFormatted}×10<sup>${exp}</sup>`;
+				}
+			}
+			
+			if (typeof value === 'number' && value !== 0) {
+				const exp = Math.floor(Math.log10(Math.abs(value)));
+				const base = value / Math.pow(10, exp);
+				const baseFormatted = parseFloat(base.toFixed(4))
+					.toString()
+					.replace(/\.?0+$/, '');
+				return `${baseFormatted}×10<sup>${exp}</sup>`;
+			}
+			
+			return value;
+		}
+
+
+		// Add new function for deleting history entries
+		function deleteHistoryEntry(id, event) {
+			event.stopPropagation();  // Prevent triggering restore
+			calculationHistory = calculationHistory.filter(entry => entry.id !== id);
+			localStorage.setItem('calculationHistory', JSON.stringify(calculationHistory));
+			updateHistoryDisplay();
+		}
+
+		function formatInputs(inputs) {
+			return Object.entries(inputs)
+				.map(([key, value]) => {
+					const formattedKey = key.replace(/([A-Z])/g, ' $1').toLowerCase();
+					let formattedValue;
+					
+					if (typeof value === 'number' && value !== 0) {
+						const exp = Math.floor(Math.log10(Math.abs(value)));
+						const base = value / Math.pow(10, exp);
+						const baseFormatted = parseFloat(base.toFixed(4))
+							.toString()
+							.replace(/\.?0+$/, '');
+						formattedValue = `${baseFormatted}×10^${exp}`;
+					} else {
+						formattedValue = value;
+					}
+					
+					const formattedUnit = key === 'unit' ? 
+						formatSIUnit(value) : formattedValue;
+					
+					return `${formattedKey}: ${formattedUnit}`;
+				})
+				.join(' | ');
+		}
+
+		function restoreCalculation(historyId) {
+			const entry = calculationHistory.find(e => e.id === historyId);
+			if (!entry) return;
+
+			switchPage('calculator');
+			
+			setTimeout(() => {
+				const buttons = document.querySelectorAll('.calculator-button');
+				const calculatorId = getCalculatorId(entry.type);
+				const buttonIndex = Array.from(buttons).findIndex(btn => 
+					btn.getAttribute('data-calculator') === calculatorId
+				);
+				
+				if (buttonIndex !== -1) {
+					currentIndex = buttonIndex;
+					updateCardPositions(currentIndex);
+				}
+				
+				switchCalculator(calculatorId);
+				
+				setTimeout(() => {
+					// Reset ethanol input states first if it's an ethanol calculation
+					if (calculatorId === 'ethanol') {
+						const availableVolInput = document.getElementById('ethanolAvailableVol');
+						const desiredVolInput = document.getElementById('ethanolDesiredVol');
+						if (availableVolInput) {
+							availableVolInput.disabled = false;
+							availableVolInput.parentElement.style.opacity = '1';
+						}
+						if (desiredVolInput) {
+							desiredVolInput.disabled = false;
+							desiredVolInput.parentElement.style.opacity = '1';
+						}
+					}
+
+					if (calculatorId === 'bufferPh') {
+						const kaInput = document.getElementById('ka');
+						const pkaInput = document.getElementById('pka');
+						if (kaInput) kaInput.disabled = false;
+						if (pkaInput) pkaInput.disabled = false;
+					}
+
+
+					// Restore input values
+					Object.entries(entry.inputs).forEach(([key, value]) => {
+						const input = document.getElementById(key);
+						if (input && value !== '') {  // Only set value if it's not empty
+							input.value = value;
+							
+							// Handle ethanol input states
+							if (key === 'ethanolAvailableVol' && value !== '') {
+								const desiredVolInput = document.getElementById('ethanolDesiredVol');
+								if (desiredVolInput) {
+									desiredVolInput.disabled = true;
+									desiredVolInput.parentElement.style.opacity = '0.5';
+								}
+							}
+							if (key === 'ethanolDesiredVol' && value !== '') {
+								const availableVolInput = document.getElementById('ethanolAvailableVol');
+								if (availableVolInput) {
+									availableVolInput.disabled = true;
+									availableVolInput.parentElement.style.opacity = '0.5';
+								}
+							}
+							
+							// Handle Buffer pH Ka/pKa interaction
+							if (key === 'ka' && value !== '') {
+								const pkaInput = document.getElementById('pka');
+								if (pkaInput) {
+									pkaInput.disabled = true;
+									pkaInput.value = (-Math.log10(parseFloat(value))).toFixed(4);
+								}
+							}
+							if (key === 'pka' && value !== '') {
+								const kaInput = document.getElementById('ka');
+								if (kaInput) {
+									kaInput.disabled = true;
+									kaInput.value = Math.pow(10, -parseFloat(value)).toExponential(4);
+								}
+							}
+
+							// Handle unit select restoration
+							if (key.includes('Unit')) {
+								const unitSelect = document.getElementById(key);
+								if (unitSelect) {
+									unitSelect.value = value;
+									unitSelect.dataset.lastUnit = value;
+								}
+							}
+							
+							// Add highlight animation
+							input.style.animation = 'highlight 0.5s ease-out';
+							input.addEventListener('animationend', () => {
+								input.style.animation = '';
+							}, { once: true });
+						}
+					});
+					
+					// Force recalculation after restoration
+					switch(calculatorId) {
+						case 'logReduction':
+							calculateLogReduction();
+							break;
+						case 'dilution':
+							calculateDilution();
+							break;
+						case 'cfu':
+							calculateCFU();
+							break;
+						case 'media':
+							calculateMedia();
+							break;
+						case 'ethanol':
+							calculateEthanol();
+							break;
+						case 'buffer':
+							calculateBuffer();
+							break;
+						case 'bufferPh':  // Add this case
+							calculateBufferPh();
+							break;
+					}
+				}, 300);
+			}, 300);
+		}
+
+        function getCalculatorId(type) {
+            const mapping = {
+                'Log Reduction': 'logReduction',
+                'Dilution': 'dilution',
+                'CFU': 'cfu',
+                'Media': 'media',
+				'Ethanol': 'ethanol',
+				'Buffer Capacity': 'buffer',
+				'Buffer pH': 'bufferPh' 
+            };
+            return mapping[type] || 'logReduction';
+        }
+
+		// Enhanced switchPage function
+		function switchPage(page, isSwipe = false) {
+			const pages = document.querySelectorAll('.page');
+			const targetPage = document.getElementById(`${page}Page`);
+			const container = document.querySelector('.container');
+			
+			// Reset scroll position
+			container.scrollTo({
+				top: 0,
+				behavior: isSwipe ? 'auto' : 'smooth'
+			});
+			
+			// Cleanup existing typewriters
+			titleWriters.forEach(writer => writer.stop());
+			titleWriters.clear();
+			
+			// Update body class
+			document.body.className = '';
+			if (page === 'calculator') document.body.classList.add('calculator-page');
+			if (page === 'welcome') document.body.classList.add('welcome-page');
+			if (darkMode) document.body.classList.add('dark');
+			
+			pages.forEach(p => {
+				if (p === targetPage) {
+					p.style.display = 'block';
+					p.offsetHeight;
+					requestAnimationFrame(() => {
+						p.classList.add('active');
+						// Reinitialize appropriate title
+						if (page === 'history') {
+							initializeHistoryTitle();
+						} else if (page === 'about') {
+							initializeAboutTitle();
+						} else if (page === 'welcome') {
+							initializeWelcomeTitle();
+						}
+					});
+				} else {
+					p.classList.remove('active');
+					setTimeout(() => {
+						if (!p.classList.contains('active')) {
+							p.style.display = 'none';
+						}
+					}, 400);
+				}
+			});
+			
+			updateBottomNav(page);
+		}
+
+		function resetInputs() {
+			const currentSection = document.getElementById(currentCalculator);
+			if (!currentSection) return;
+
+			const inputs = currentSection.querySelectorAll('input, select');
+			const result = currentSection.querySelector('.result');
+			
+			inputs.forEach(input => {
+				if (input.tagName === 'SELECT') {
+					input.selectedIndex = 0;
+				} else {
+					input.value = '';
+					input.disabled = false;  // Reset disabled state
+				}
+			});
+			
+			if (result) {
+				result.style.opacity = '0';
+				setTimeout(() => {
+					result.style.display = 'none';
+				}, 300);
+			}
+		}
+
+        function updateBottomNav(page) {
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                const isActive = item.getAttribute('data-page') === page;
+                item.classList.toggle('active', isActive);
+            });
+        }
+    </script>
+</body>
+</html>
